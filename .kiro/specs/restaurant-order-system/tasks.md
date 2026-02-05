@@ -229,7 +229,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Configurar propiedades custom de RabbitMQ (exchange.name, queue.name, routing-key, dlq)
     - _Requisitos: 12.3, 12.4, 12.6_
 
-- [-] 12. Checkpoint - Verificar compilación y configuración básica
+- [x] 12. Checkpoint - Verificar compilación y configuración básica
   - Compilar ambos proyectos con mvn clean install
   - Verificar que no hay errores de compilación
   - Verificar que las migraciones Flyway están correctamente ubicadas
@@ -381,7 +381,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Verificar que GET /orders/{id} devuelve pedido actualizado
   - _Requisitos: 2.1, 3.1, 7.1, 7.4_
 
-- [~] 18. Checkpoint final - Verificar sistema completo
+- [x] 18. Checkpoint final - Verificar sistema completo
   - Iniciar PostgreSQL y RabbitMQ (Docker)
   - Ejecutar migraciones Flyway
   - Iniciar order-service y verificar que arranca sin errores
