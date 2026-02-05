@@ -159,13 +159,13 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - _Requisitos: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 3.1, 4.1, 4.2, 5.1, 5.2, 6.2_
 
 - [ ] 8. Implementar controladores de Order Service
-  - [-] 8.1 Crear MenuController
+  - [x] 8.1 Crear MenuController
     - Endpoint GET /menu
     - Inyectar MenuService
     - Llamar a getActiveProducts() y devolver ResponseEntity con 200 OK
     - _Requisitos: 1.1_
   
-  - [~] 8.2 Crear OrderController
+  - [-] 8.2 Crear OrderController
     - Endpoint POST /orders con @Valid CreateOrderRequest
       - Llamar a orderService.createOrder()
       - Devolver ResponseEntity con 201 Created
