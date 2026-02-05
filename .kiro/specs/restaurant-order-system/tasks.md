@@ -72,27 +72,27 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - UpdateStatusRequest con validación de enum
     - _Requisitos: 2.1, 2.7, 2.8, 6.1_
   
-  - [-] 4.2 Crear DTOs de response
+  - [x] 4.2 Crear DTOs de response
     - ProductResponse con campos id, name, description
     - OrderResponse con campos completos y lista de OrderItemResponse
     - OrderItemResponse con campos del item
     - ErrorResponse con timestamp, status, error, message
     - _Requisitos: 1.1, 4.1, 11.1, 11.2, 11.3, 11.4, 11.5_
   
-  - [~] 4.3 Crear OrderPlacedEvent
+  - [x] 4.3 Crear OrderPlacedEvent
     - Implementar clase Serializable con campos: orderId, tableId, items (List<OrderItemEventData>), createdAt
     - Crear clase interna OrderItemEventData con productId y quantity
     - Usar Lombok para getters/setters
     - _Requisitos: 3.1, 3.3, 3.5_
 
 - [ ] 5. Implementar excepciones personalizadas y manejo global
-  - [~] 5.1 Crear excepciones personalizadas
+  - [x] 5.1 Crear excepciones personalizadas
     - ProductNotFoundException con mensaje descriptivo
     - OrderNotFoundException con mensaje descriptivo
     - InvalidOrderException con mensaje descriptivo
     - _Requisitos: 2.6, 4.3, 6.4, 11.2_
   
-  - [~] 5.2 Crear GlobalExceptionHandler
+  - [x] 5.2 Crear GlobalExceptionHandler
     - Implementar @RestControllerAdvice
     - Agregar @ExceptionHandler para ProductNotFoundException (404)
     - Agregar @ExceptionHandler para OrderNotFoundException (404)
@@ -104,7 +104,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - _Requisitos: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
 - [ ] 6. Configurar RabbitMQ
-  - [~] 6.1 Crear RabbitMQConfig en order-service
+  - [x] 6.1 Crear RabbitMQConfig en order-service
     - Declarar TopicExchange "order.exchange" (durable)
     - Declarar Queue "order.placed.queue" (durable)
     - Declarar Dead Letter Queue "order.placed.dlq"
@@ -112,7 +112,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Configurar MessageConverter (Jackson2JsonMessageConverter)
     - _Requisitos: 3.2, 8.1, 8.2, 8.3, 8.4_
   
-  - [~] 6.2 Crear RabbitMQConfig en kitchen-worker
+  - [x] 6.2 Crear RabbitMQConfig en kitchen-worker
     - Declarar TopicExchange "order.exchange"
     - Declarar Queue "order.placed.queue" con DLX configurado
     - Declarar Dead Letter Queue "order.placed.dlq"
@@ -122,19 +122,19 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - _Requisitos: 7.1, 8.3, 8.5_
 
 - [ ] 7. Implementar servicios de Order Service
-  - [~] 7.1 Crear MenuService
+  - [x] 7.1 Crear MenuService
     - Implementar método getActiveProducts() que use ProductRepository.findByIsActiveTrue()
     - Mapear entidades Product a ProductResponse
     - _Requisitos: 1.1, 1.2, 1.3_
   
-  - [~] 7.2 Crear OrderEventPublisher
+  - [x] 7.2 Crear OrderEventPublisher
     - Inyectar RabbitTemplate
     - Implementar método publishOrderPlacedEvent(OrderPlacedEvent event)
     - Usar convertAndSend con exchange "order.exchange" y routing key "order.placed"
     - Agregar try-catch para logging de errores sin lanzar excepción
     - _Requisitos: 3.1, 3.2, 3.4, 3.5_
   
-  - [~] 7.3 Crear OrderService
+  - [x] 7.3 Crear OrderService
     - Implementar createOrder(CreateOrderRequest request)
       - Validar que todos los productIds existen y están activos
       - Lanzar ProductNotFoundException si algún producto no existe o está inactivo
@@ -159,13 +159,13 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - _Requisitos: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 3.1, 4.1, 4.2, 5.1, 5.2, 6.2_
 
 - [ ] 8. Implementar controladores de Order Service
-  - [~] 8.1 Crear MenuController
+  - [x] 8.1 Crear MenuController
     - Endpoint GET /menu
     - Inyectar MenuService
     - Llamar a getActiveProducts() y devolver ResponseEntity con 200 OK
     - _Requisitos: 1.1_
   
-  - [~] 8.2 Crear OrderController
+  - [-] 8.2 Crear OrderController
     - Endpoint POST /orders con @Valid CreateOrderRequest
       - Llamar a orderService.createOrder()
       - Devolver ResponseEntity con 201 Created
