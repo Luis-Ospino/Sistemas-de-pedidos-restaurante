@@ -6,7 +6,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
 
 ## Tareas
 
-- [-] 1. Configurar estructura de proyectos Maven
+- [x] 1. Configurar estructura de proyectos Maven
   - Crear proyecto Maven multi-módulo con dos submódulos: order-service y kitchen-worker
   - Configurar pom.xml padre con dependencias comunes (Spring Boot 3, Java 17, Lombok, PostgreSQL, Spring AMQP)
   - Configurar pom.xml de order-service con dependencias específicas (Spring Web, Spring Data JPA, Flyway, SpringDoc OpenAPI)
@@ -15,11 +15,11 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
   - _Requisitos: 12.1, 12.2, 12.3, 12.4_
 
 - [ ] 2. Implementar modelo de datos y migraciones
-  - [~] 2.1 Crear enum OrderStatus
+  - [x] 2.1 Crear enum OrderStatus
     - Implementar enum con valores PENDING, IN_PREPARATION, READY
     - _Requisitos: 2.3, 6.2, 7.4_
   
-  - [~] 2.2 Crear entidad Product
+  - [-] 2.2 Crear entidad Product
     - Implementar clase con anotaciones JPA (@Entity, @Table, @Id, @GeneratedValue)
     - Campos: id (Long), name (String), description (String), isActive (Boolean)
     - Usar Lombok (@Data, @NoArgsConstructor, @AllArgsConstructor)
