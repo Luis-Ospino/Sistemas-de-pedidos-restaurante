@@ -72,27 +72,27 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - UpdateStatusRequest con validación de enum
     - _Requisitos: 2.1, 2.7, 2.8, 6.1_
   
-  - [-] 4.2 Crear DTOs de response
+  - [x] 4.2 Crear DTOs de response
     - ProductResponse con campos id, name, description
     - OrderResponse con campos completos y lista de OrderItemResponse
     - OrderItemResponse con campos del item
     - ErrorResponse con timestamp, status, error, message
     - _Requisitos: 1.1, 4.1, 11.1, 11.2, 11.3, 11.4, 11.5_
   
-  - [~] 4.3 Crear OrderPlacedEvent
+  - [x] 4.3 Crear OrderPlacedEvent
     - Implementar clase Serializable con campos: orderId, tableId, items (List<OrderItemEventData>), createdAt
     - Crear clase interna OrderItemEventData con productId y quantity
     - Usar Lombok para getters/setters
     - _Requisitos: 3.1, 3.3, 3.5_
 
 - [ ] 5. Implementar excepciones personalizadas y manejo global
-  - [~] 5.1 Crear excepciones personalizadas
+  - [x] 5.1 Crear excepciones personalizadas
     - ProductNotFoundException con mensaje descriptivo
     - OrderNotFoundException con mensaje descriptivo
     - InvalidOrderException con mensaje descriptivo
     - _Requisitos: 2.6, 4.3, 6.4, 11.2_
   
-  - [~] 5.2 Crear GlobalExceptionHandler
+  - [-] 5.2 Crear GlobalExceptionHandler
     - Implementar @RestControllerAdvice
     - Agregar @ExceptionHandler para ProductNotFoundException (404)
     - Agregar @ExceptionHandler para OrderNotFoundException (404)
