@@ -165,7 +165,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Llamar a getActiveProducts() y devolver ResponseEntity con 200 OK
     - _Requisitos: 1.1_
   
-  - [-] 8.2 Crear OrderController
+  - [x] 8.2 Crear OrderController
     - Endpoint POST /orders con @Valid CreateOrderRequest
       - Llamar a orderService.createOrder()
       - Devolver ResponseEntity con 201 Created
@@ -180,7 +180,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
       - Devolver ResponseEntity con 200 OK
     - _Requisitos: 2.1, 4.1, 5.1, 6.1_
 
-- [~] 9. Configurar Swagger/OpenAPI
+- [x] 9. Configurar Swagger/OpenAPI
   - Crear OpenAPIConfig con @Configuration
   - Configurar OpenAPI bean con información de API (título, versión, descripción)
   - Agregar ejemplos de request/response en anotaciones de controladores
@@ -188,7 +188,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
   - _Requisitos: 10.1, 10.2, 10.3, 10.4_
 
 - [ ] 10. Implementar Kitchen Worker
-  - [~] 10.1 Crear OrderProcessingService
+  - [x] 10.1 Crear OrderProcessingService
     - Inyectar OrderRepository
     - Implementar método processOrder(OrderPlacedEvent event)
       - Buscar Order por event.getOrderId()
@@ -199,7 +199,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Agregar try-catch para logging de errores y re-lanzar excepción para trigger retry
     - _Requisitos: 7.2, 7.3, 7.4, 7.5, 7.6_
   
-  - [~] 10.2 Crear OrderEventListener
+  - [-] 10.2 Crear OrderEventListener
     - Anotar con @Component
     - Inyectar OrderProcessingService
     - Implementar método handleOrderPlacedEvent(OrderPlacedEvent event)
