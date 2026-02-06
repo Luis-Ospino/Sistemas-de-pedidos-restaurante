@@ -165,7 +165,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Llamar a getActiveProducts() y devolver ResponseEntity con 200 OK
     - _Requisitos: 1.1_
   
-  - [-] 8.2 Crear OrderController
+  - [x] 8.2 Crear OrderController
     - Endpoint POST /orders con @Valid CreateOrderRequest
       - Llamar a orderService.createOrder()
       - Devolver ResponseEntity con 201 Created
@@ -180,7 +180,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
       - Devolver ResponseEntity con 200 OK
     - _Requisitos: 2.1, 4.1, 5.1, 6.1_
 
-- [~] 9. Configurar Swagger/OpenAPI
+- [x] 9. Configurar Swagger/OpenAPI
   - Crear OpenAPIConfig con @Configuration
   - Configurar OpenAPI bean con información de API (título, versión, descripción)
   - Agregar ejemplos de request/response en anotaciones de controladores
@@ -188,7 +188,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
   - _Requisitos: 10.1, 10.2, 10.3, 10.4_
 
 - [ ] 10. Implementar Kitchen Worker
-  - [~] 10.1 Crear OrderProcessingService
+  - [x] 10.1 Crear OrderProcessingService
     - Inyectar OrderRepository
     - Implementar método processOrder(OrderPlacedEvent event)
       - Buscar Order por event.getOrderId()
@@ -199,7 +199,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Agregar try-catch para logging de errores y re-lanzar excepción para trigger retry
     - _Requisitos: 7.2, 7.3, 7.4, 7.5, 7.6_
   
-  - [~] 10.2 Crear OrderEventListener
+  - [x] 10.2 Crear OrderEventListener
     - Anotar con @Component
     - Inyectar OrderProcessingService
     - Implementar método handleOrderPlacedEvent(OrderPlacedEvent event)
@@ -208,7 +208,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - _Requisitos: 7.1, 7.2_
 
 - [ ] 11. Crear archivos de configuración
-  - [~] 11.1 Crear application.yml para order-service
+  - [x] 11.1 Crear application.yml para order-service
     - Configurar spring.application.name = order-service
     - Configurar datasource (url, username, password, driver)
     - Configurar JPA (hibernate.ddl-auto=validate, show-sql=false, dialect)
@@ -219,7 +219,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Configurar SpringDoc (api-docs.path, swagger-ui.path)
     - _Requisitos: 12.1, 12.2, 12.5_
   
-  - [~] 11.2 Crear application.yml para kitchen-worker
+  - [x] 11.2 Crear application.yml para kitchen-worker
     - Configurar spring.application.name = kitchen-worker
     - Configurar datasource (misma BD que order-service)
     - Configurar JPA (hibernate.ddl-auto=validate, show-sql=false)
@@ -229,7 +229,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Configurar propiedades custom de RabbitMQ (exchange.name, queue.name, routing-key, dlq)
     - _Requisitos: 12.3, 12.4, 12.6_
 
-- [~] 12. Checkpoint - Verificar compilación y configuración básica
+- [x] 12. Checkpoint - Verificar compilación y configuración básica
   - Compilar ambos proyectos con mvn clean install
   - Verificar que no hay errores de compilación
   - Verificar que las migraciones Flyway están correctamente ubicadas
@@ -381,7 +381,7 @@ Este plan de implementación desglosa el diseño del sistema de pedidos de resta
     - Verificar que GET /orders/{id} devuelve pedido actualizado
   - _Requisitos: 2.1, 3.1, 7.1, 7.4_
 
-- [~] 18. Checkpoint final - Verificar sistema completo
+- [x] 18. Checkpoint final - Verificar sistema completo
   - Iniciar PostgreSQL y RabbitMQ (Docker)
   - Ejecutar migraciones Flyway
   - Iniciar order-service y verificar que arranca sin errores
