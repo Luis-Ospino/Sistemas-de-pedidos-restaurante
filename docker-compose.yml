@@ -3,15 +3,13 @@ services:
     image: postgres:16
     container_name: orders-postgres
     environment:
-      POSTGRES_DB: orders_db
-      POSTGRES_USER: orders_user
-      POSTGRES_PASSWORD: orders_pass
+      POSTGRES_DB: restaurant_db
+      POSTGRES_USER: restaurant_user
+      POSTGRES_PASSWORD: restaurant_pass
     ports:
       - "5432:5432"
-    volumes:
-      - ./bd:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U orders_user -d orders_db"]
+      test: ["CMD-SHELL", "pg_isready -U restaurant_user -d restaurant_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,21 +29,21 @@ services:
       timeout: 5s
       retries: 5
 
-  order-api:
+  order-service:
     build:
-      context: ./order-api
-      dockerfile: Dockerfile
-    container_name: orders-api
+      context: .
+      dockerfile: order-service/Dockerfile
+    container_name: orders-service
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orders_db
-      SPRING_DATASOURCE_USERNAME: orders_user
-      SPRING_DATASOURCE_PASSWORD: orders_pass
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
+      DB_URL: jdbc:postgresql://postgres:5432/restaurant_db
+      DB_USER: restaurant_user
+      DB_PASS: restaurant_pass
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,19 +52,17 @@ services:
 
   kitchen-worker:
     build:
-      context: ./kitchen-worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: kitchen-worker/Dockerfile
     container_name: orders-kitchen-worker
     environment:
+      DB_URL: jdbc:postgresql://postgres:5432/restaurant_db
+      DB_USER: restaurant_user
+      DB_PASS: restaurant_pass
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: orders_db
-      DB_USER: orders_user
-      DB_PASSWORD: orders_pass
+      RABBITMQ_PASS: guest
     depends_on:
       postgres:
         condition: service_healthy

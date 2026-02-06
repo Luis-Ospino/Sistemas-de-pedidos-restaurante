@@ -373,3 +373,16 @@ docker-compose ps
 # Stop services
 docker-compose down
 ```
+
+## Environment Variables (.env)
+
+Defaults for local execution are in `.env`. You can override them per machine without changing code.
+
+Key variables:
+`DB_URL`
+`DB_USER`
+`DB_PASS`
+`RABBITMQ_HOST`
+`RABBITMQ_PORT`
+`RABBITMQ_USER`
+`RABBITMQ_PASS`
