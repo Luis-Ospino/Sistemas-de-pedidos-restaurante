@@ -69,7 +69,7 @@ public class OrderController {
      * - 4.1: Order Service exposes GET /orders/{id} endpoint
      */
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable UUID id) {
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable("id") UUID id) {
         OrderResponse orderResponse = orderService.getOrderById(id);
         return ResponseEntity.ok(orderResponse);
     }
@@ -88,7 +88,7 @@ public class OrderController {
      */
     @GetMapping
     public ResponseEntity<List<OrderResponse>> getOrders(
-            @RequestParam(required = false) OrderStatus status) {
+            @RequestParam(name = "status", required = false) OrderStatus status) {
         List<OrderResponse> orders = orderService.getOrders(status);
         return ResponseEntity.ok(orders);
     }
@@ -107,7 +107,7 @@ public class OrderController {
      */
     @PatchMapping("/{id}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateStatusRequest request) {
         OrderResponse orderResponse = orderService.updateOrderStatus(id, request.getStatus());
         return ResponseEntity.ok(orderResponse);
