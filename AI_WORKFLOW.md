@@ -7,6 +7,48 @@
 
 ## Metodología
 
+## Protocolo Spec-Driven y OpenSpec (este repo)
+
+### 1) Que es Spec-Driven?
+Es un flujo donde primero definimos el cambio con artefactos de especificacion y luego implementamos:
+- proposal: por que y que cambia.
+- specs: que debe hacer (requisitos + escenarios).
+- design: como se va a implementar (decisiones).
+- tasks: checklist de trabajo.
+
+### 2) Como usamos OpenSpec aqui?
+Usamos OpenSpec para crear y ejecutar esos artefactos de forma consistente. En este proyecto el flujo recomendado es:
+1. Crear cambio
+2. Completar artefactos (proposal, specs, design, tasks)
+3. Aplicar cambios (implementacion)
+4. Verificar
+5. Archivar
+
+### 3) Comandos que usamos (con /openspec en el chat)
+- Crear cambio: /openspec new change <nombre-kebab>
+- Ver estado: /openspec status --change "<nombre>"
+- Ver instrucciones: /openspec instructions <artifacto> --change "<nombre>"
+- Implementar: /openspec apply change <nombre>
+- Verificar: /openspec verify change <nombre>
+- Archivar: /openspec archive change <nombre>
+
+Nota: si se usa CLI directo, los comandos son los mismos sin el prefijo /openspec.
+
+### 4) Convenciones locales
+- Nombre de cambio: kebab-case (ej. frontend-mockdata, docs-driven-spec).
+- Ramas: feature/<scope> y PR hacia develop (GitFlow).
+- Cuando verificar: antes de PR o antes de archivar, especialmente si hubo cambios grandes.
+
+### 5) Ejemplo real (este repo)
+1. /openspec new change docs-driven-spec
+2. /openspec instructions proposal --change "docs-driven-spec" (crear proposal)
+3. /openspec instructions specs --change "docs-driven-spec" (crear specs)
+4. /openspec instructions design --change "docs-driven-spec" (crear design)
+5. /openspec instructions tasks --change "docs-driven-spec" (crear tasks)
+6. /openspec apply change docs-driven-spec (implementar cambios)
+7. /openspec verify change docs-driven-spec (verificar)
+8. /openspec archive change docs-driven-spec (cerrar el cambio)
+
 ### 1) Principios AI‑First (no negociables)
 - **La IA es el Junior Developer**: genera boilerplate, scaffolding, pruebas base y propone integraciones.
 - **El equipo es Arquitecto + Revisor**: define criterios, valida calidad, integra y corrige.
@@ -333,4 +375,6 @@ La IA debe detenerse y preguntar cuando falte:
 - Preferir cambios “pequeños e integrables” por iteraciones.
 
 ---
-**Última actualización:** 2026-02-04
+**Última actualización:** 2026-02-06
+
+
