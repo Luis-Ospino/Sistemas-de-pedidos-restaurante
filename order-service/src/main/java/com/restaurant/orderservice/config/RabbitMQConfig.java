@@ -1,7 +1,7 @@
 package com.restaurant.orderservice.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -44,8 +44,7 @@ public class RabbitMQConfig {
      * @return MessageConverter configured for JSON
      */
     @Bean
-    public MessageConverter messageConverter() {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public MessageConverter messageConverter(ObjectMapper objectMapper) {
         objectMapper.registerModule(new JavaTimeModule());
         return new Jackson2JsonMessageConverter(objectMapper);
     }
