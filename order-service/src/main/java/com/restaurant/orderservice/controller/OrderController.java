@@ -1,10 +1,20 @@
 package com.restaurant.orderservice.controller;
 
 import com.restaurant.orderservice.dto.CreateOrderRequest;
+import com.restaurant.orderservice.dto.ErrorResponse;
 import com.restaurant.orderservice.dto.OrderResponse;
 import com.restaurant.orderservice.dto.UpdateStatusRequest;
 import com.restaurant.orderservice.enums.OrderStatus;
 import com.restaurant.orderservice.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +34,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/orders")
+@Tag(name = "Orders", description = "Order management endpoints for creating, retrieving, filtering, and updating orders")
 public class OrderController {
     
     private final OrderService orderService;
@@ -52,6 +63,146 @@ public class OrderController {
      * - 2.1: Order Service exposes POST /orders endpoint accepting tableId and items
      */
     @PostMapping
+    @Operation(
+            summary = "Create a new order",
+            description = "Creates a new order for a specific table with the provided items. " +
+                    "Validates that all products exist and are active. " +
+                    "Publishes an order.placed event to RabbitMQ for asynchronous processing."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Order created successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = OrderResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Created Order",
+                                    value = """
+                                            {
+                                              "id": "550e8400-e29b-41d4-a716-446655440000",
+                                              "tableId": 5,
+                                              "status": "PENDING",
+                                              "items": [
+                                                {
+                                                  "id": 1,
+                                                  "productId": 1,
+                                                  "quantity": 2,
+                                                  "note": "Sin cebolla"
+                                                },
+                                                {
+                                                  "id": 2,
+                                                  "productId": 3,
+                                                  "quantity": 1,
+                                                  "note": null
+                                                }
+                                              ],
+                                              "createdAt": "2024-01-15T10:30:00",
+                                              "updatedAt": "2024-01-15T10:30:00"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid input data",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Invalid Table ID",
+                                            value = """
+                                                    {
+                                                      "timestamp": "2024-01-15T10:30:00",
+                                                      "status": 400,
+                                                      "error": "Bad Request",
+                                                      "message": "Table ID must be positive"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Empty Items",
+                                            value = """
+                                                    {
+                                                      "timestamp": "2024-01-15T10:30:00",
+                                                      "status": 400,
+                                                      "error": "Bad Request",
+                                                      "message": "Order must contain at least one item"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Product does not exist or is inactive",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Product Not Found",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 404,
+                                              "error": "Not Found",
+                                              "message": "Product not found with id: 999"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Service Unavailable - Database is not accessible",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Service Unavailable",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 503,
+                                              "error": "Service Unavailable",
+                                              "message": "Database service is temporarily unavailable"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Order creation request with table ID and items",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CreateOrderRequest.class),
+                    examples = @ExampleObject(
+                            name = "Order Request",
+                            value = """
+                                    {
+                                      "tableId": 5,
+                                      "items": [
+                                        {
+                                          "productId": 1,
+                                          "quantity": 2,
+                                          "note": "Sin cebolla"
+                                        },
+                                        {
+                                          "productId": 3,
+                                          "quantity": 1,
+                                          "note": null
+                                        }
+                                      ]
+                                    }
+                                    """
+                    )
+            )
+    )
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         OrderResponse orderResponse = orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderResponse);
@@ -69,7 +220,81 @@ public class OrderController {
      * - 4.1: Order Service exposes GET /orders/{id} endpoint
      */
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable UUID id) {
+    @Operation(
+            summary = "Get order by ID",
+            description = "Retrieves complete order details including all items, status, and timestamps."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Order retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = OrderResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Order Details",
+                                    value = """
+                                            {
+                                              "id": "550e8400-e29b-41d4-a716-446655440000",
+                                              "tableId": 5,
+                                              "status": "IN_PREPARATION",
+                                              "items": [
+                                                {
+                                                  "id": 1,
+                                                  "productId": 1,
+                                                  "quantity": 2,
+                                                  "note": "Sin cebolla"
+                                                }
+                                              ],
+                                              "createdAt": "2024-01-15T10:30:00",
+                                              "updatedAt": "2024-01-15T10:35:00"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid UUID format",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Invalid UUID",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 400,
+                                              "error": "Bad Request",
+                                              "message": "Invalid UUID format"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Order does not exist",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Order Not Found",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 404,
+                                              "error": "Not Found",
+                                              "message": "Order not found with id: 550e8400-e29b-41d4-a716-446655440000"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    public ResponseEntity<OrderResponse> getOrderById(
+            @Parameter(description = "UUID of the order to retrieve", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
+            @PathVariable UUID id) {
         OrderResponse orderResponse = orderService.getOrderById(id);
         return ResponseEntity.ok(orderResponse);
     }
@@ -87,7 +312,79 @@ public class OrderController {
      * - 5.1: Order Service exposes GET /orders with optional status parameter
      */
     @GetMapping
+    @Operation(
+            summary = "Get all orders or filter by status",
+            description = "Retrieves all orders or filters by status (PENDING, IN_PREPARATION, READY). " +
+                    "If status parameter is omitted, returns all orders."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Orders retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = OrderResponse.class)),
+                            examples = @ExampleObject(
+                                    name = "Orders List",
+                                    value = """
+                                            [
+                                              {
+                                                "id": "550e8400-e29b-41d4-a716-446655440000",
+                                                "tableId": 5,
+                                                "status": "PENDING",
+                                                "items": [
+                                                  {
+                                                    "id": 1,
+                                                    "productId": 1,
+                                                    "quantity": 2,
+                                                    "note": "Sin cebolla"
+                                                  }
+                                                ],
+                                                "createdAt": "2024-01-15T10:30:00",
+                                                "updatedAt": "2024-01-15T10:30:00"
+                                              },
+                                              {
+                                                "id": "660e8400-e29b-41d4-a716-446655440001",
+                                                "tableId": 3,
+                                                "status": "IN_PREPARATION",
+                                                "items": [
+                                                  {
+                                                    "id": 2,
+                                                    "productId": 2,
+                                                    "quantity": 1,
+                                                    "note": null
+                                                  }
+                                                ],
+                                                "createdAt": "2024-01-15T10:25:00",
+                                                "updatedAt": "2024-01-15T10:28:00"
+                                              }
+                                            ]
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid status value",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Invalid Status",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 400,
+                                              "error": "Bad Request",
+                                              "message": "Invalid status value. Must be one of: PENDING, IN_PREPARATION, READY"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     public ResponseEntity<List<OrderResponse>> getOrders(
+            @Parameter(description = "Optional status filter (PENDING, IN_PREPARATION, READY)", required = false, example = "PENDING")
             @RequestParam(required = false) OrderStatus status) {
         List<OrderResponse> orders = orderService.getOrders(status);
         return ResponseEntity.ok(orders);
@@ -106,7 +403,98 @@ public class OrderController {
      * - 6.1: Order Service exposes PATCH /orders/{id}/status endpoint
      */
     @PatchMapping("/{id}/status")
+    @Operation(
+            summary = "Update order status",
+            description = "Updates the status of an existing order. " +
+                    "Valid status values are: PENDING, IN_PREPARATION, READY. " +
+                    "The updatedAt timestamp is automatically updated."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Order status updated successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = OrderResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Updated Order",
+                                    value = """
+                                            {
+                                              "id": "550e8400-e29b-41d4-a716-446655440000",
+                                              "tableId": 5,
+                                              "status": "READY",
+                                              "items": [
+                                                {
+                                                  "id": 1,
+                                                  "productId": 1,
+                                                  "quantity": 2,
+                                                  "note": "Sin cebolla"
+                                                }
+                                              ],
+                                              "createdAt": "2024-01-15T10:30:00",
+                                              "updatedAt": "2024-01-15T10:45:00"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid status value",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Invalid Status",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 400,
+                                              "error": "Bad Request",
+                                              "message": "Invalid status value. Must be one of: PENDING, IN_PREPARATION, READY"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Order does not exist",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Order Not Found",
+                                    value = """
+                                            {
+                                              "timestamp": "2024-01-15T10:30:00",
+                                              "status": 404,
+                                              "error": "Not Found",
+                                              "message": "Order not found with id: 550e8400-e29b-41d4-a716-446655440000"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Status update request",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UpdateStatusRequest.class),
+                    examples = @ExampleObject(
+                            name = "Status Update",
+                            value = """
+                                    {
+                                      "status": "READY"
+                                    }
+                                    """
+                    )
+            )
+    )
     public ResponseEntity<OrderResponse> updateOrderStatus(
+            @Parameter(description = "UUID of the order to update", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id,
             @Valid @RequestBody UpdateStatusRequest request) {
         OrderResponse orderResponse = orderService.updateOrderStatus(id, request.getStatus());
