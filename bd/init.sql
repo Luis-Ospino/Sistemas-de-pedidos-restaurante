@@ -25,7 +25,7 @@ CREATE TABLE order_item (
   note VARCHAR(255)
 );
 
-INSERT INTO product (id, name, description)
+INSERT INTO product (id_product, product_namename, product_description)
 VALUES
   (uuid_generate_v4(), 'Hamburguesa', 'Hamburguesa clásica'),
   (uuid_generate_v4(), 'Pizza', 'Pizza personal'),

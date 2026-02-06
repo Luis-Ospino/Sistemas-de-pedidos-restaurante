@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16
@@ -12,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders_user -d orders_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -19,3 +22,53 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order-api:
+    build:
+      context: ./order-api
+      dockerfile: Dockerfile
+    container_name: orders-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orders_db
+      SPRING_DATASOURCE_USERNAME: orders_user
+      SPRING_DATASOURCE_PASSWORD: orders_pass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  kitchen-worker:
+    build:
+      context: ./kitchen-worker
+      dockerfile: Dockerfile
+    container_name: orders-kitchen-worker
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: orders_db
+      DB_USER: orders_user
+      DB_PASSWORD: orders_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
