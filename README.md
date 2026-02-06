@@ -1,4 +1,4 @@
-# Sistema de Pedidos de Restaurante
+﻿# Sistema de Pedidos de Restaurante
 
 Stack full-stack con frontend, backend y RabbitMQ. La ejecucion recomendada para QA/local es via Docker Compose.
 
@@ -19,6 +19,16 @@ Stack full-stack con frontend, backend y RabbitMQ. La ejecucion recomendada para
 | RabbitMQ Management UI | 15672 |
 
 ## Inicio rapido (Docker Compose)
+Copia `.env.example` a `.env` y ajusta si necesitas:
+```bash
+cp .env.example .env
+```
+En PowerShell:
+```powershell
+Copy-Item .env.example .env
+```
+
+Levantar:
 ```bash
 docker compose up -d --build
 ```
