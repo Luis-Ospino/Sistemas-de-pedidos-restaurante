@@ -1,3 +1,5 @@
+import { ENV } from '@/api/env'
+import { http } from '@/api/http'
 import type { CreateOrderRequest, CreateOrderResponse, Order, OrderStatus } from '@/api/contracts'
 import {
   mockCreateOrder,
@@ -7,16 +9,24 @@ import {
 } from '@/api/mock'
 
 export function createOrder(req: CreateOrderRequest) {
-  return mockCreateOrder(req)
+  if (ENV.USE_MOCK) return mockCreateOrder(req)
+  return http<CreateOrderResponse>('/orders', { method: 'POST', json: req })
 }
 
 export function getOrder(orderId: string) {
-  return mockGetOrder(orderId)
+  if (ENV.USE_MOCK) return mockGetOrder(orderId)
+  return http<Order>(`/orders/${encodeURIComponent(orderId)}`)
 }
 
 export function listOrders(params: { status?: OrderStatus[] }, kitchenToken?: string) {
-  void kitchenToken
-  return mockListOrders(params)
+  if (ENV.USE_MOCK) return mockListOrders(params)
+
+  const qs = new URLSearchParams()
+  if (params.status && params.status.length > 0) {
+    qs.set('status', params.status.join(','))
+  }
+  const suffix = qs.toString() ? `?${qs.toString()}` : ''
+  return http<Order[]>(`/orders${suffix}`, { kitchenToken })
 }
 
 export function patchOrderStatus(
@@ -24,6 +34,11 @@ export function patchOrderStatus(
   newStatus: OrderStatus,
   kitchenToken?: string,
 ) {
-  void kitchenToken
-  return mockPatchOrderStatus(orderId, newStatus)
+  if (ENV.USE_MOCK) return mockPatchOrderStatus(orderId, newStatus)
+
+  return http<Order>(`/orders/${encodeURIComponent(orderId)}/status`, {
+    method: 'PATCH',
+    json: { newStatus, status: newStatus },
+    kitchenToken,
+  })
 }
