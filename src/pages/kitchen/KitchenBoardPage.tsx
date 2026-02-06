@@ -46,6 +46,16 @@ export function KitchenBoardPage() {
     }
   }, [statusFilter])
 
+  const grouped = useMemo(() => {
+    const by: Record<OrderStatus, Order[]> = {
+      PENDING: [],
+      IN_PREPARATION: [],
+      READY: [],
+    }
+    for (const o of orders) by[o.status]?.push(o)
+    return by
+  }, [orders])
+
   if (loading) return <Loading label="Cargando pedidos…" />
 
   if (error) {
@@ -57,16 +67,6 @@ export function KitchenBoardPage() {
       />
     )
   }
-
-  const grouped = useMemo(() => {
-    const by: Record<OrderStatus, Order[]> = {
-      PENDING: [],
-      IN_PREPARATION: [],
-      READY: [],
-    }
-    for (const o of orders) by[o.status]?.push(o)
-    return by
-  }, [orders])
 
   function orderIdOf(o: Order) {
     return o.id
