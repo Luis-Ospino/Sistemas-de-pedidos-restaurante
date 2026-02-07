@@ -39,6 +39,43 @@ Sistema fullstack para gestionar pedidos de restaurante que incluye:
 
 ## 🚀 Inicio Rápido
 
+## 🌐 Demo Pública Temporal (sin instalar nada)
+
+Esta demo es **temporal** y se usa solo para mostrar el sistema a terceros. Las URLs cambian si se cierran los túneles.
+
+### Para usuarios (no técnicos)
+1. Abre la URL pública del frontend (te la comparte quien publica la demo).
+2. Selecciona mesa, crea un pedido y revisa el estado.
+3. En la parte de “Cocina” puedes ver y actualizar el estado del pedido.
+
+### Para quien publica la demo (operador)
+1. Actualiza el código y levanta el stack:
+   `git checkout develop`
+   `git pull origin develop`
+   `docker compose up -d --build`
+2. Configura variables para el demo en `.env`:
+   - `VITE_USE_MOCK=false`
+   - `VITE_API_BASE_URL=<URL_BACKEND_PUBLICA>`
+   - `VITE_ALLOWED_HOSTS=.trycloudflare.com`
+   - `CORS_ALLOWED_ORIGIN_PATTERNS=https://*.trycloudflare.com`
+3. Abre túneles (en dos terminales):
+   Backend: `cloudflared tunnel --url http://localhost:8080`
+   Frontend: `cloudflared tunnel --url http://localhost:5173`
+4. Rebuild del frontend para tomar la URL pública del backend:
+   - `docker compose up -d --build frontend`
+
+**Detener demo:**
+`docker compose down`
+Cerrar las terminales de `cloudflared`
+
+## ✅ Producción (main)
+
+En producción el sistema debe funcionar **sin mockdata**:
+`VITE_USE_MOCK=false`
+
+No dejes habilitados hosts temporales. Para producción usa tu **dominio real** y configura CORS explícito:
+`CORS_ALLOWED_ORIGIN_PATTERNS=https://tu-dominio.com`
+
 ### Prerrequisitos
 
 - **Docker Desktop** instalado y corriendo
@@ -334,6 +371,10 @@ El archivo `.env` contiene todas las configuraciones necesarias:
 VITE_USE_MOCK=false                          # Usar datos mock o API real
 VITE_API_BASE_URL=http://localhost:8080      # URL del backend
 VITE_KITCHEN_PIN=1234                        # PIN de acceso a cocina
+
+# Demo temporal (solo si usas Quick Tunnel)
+# VITE_ALLOWED_HOSTS=.trycloudflare.com
+# CORS_ALLOWED_ORIGIN_PATTERNS=https://*.trycloudflare.com
 
 # PostgreSQL
 POSTGRES_DB=restaurant_db
