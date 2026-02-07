@@ -1,10 +1,10 @@
-spring:
+﻿spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5433/restaurant_db
-    username: restaurant_user
-    password: restaurant_pass
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/restaurant_db}
+    username: ${DB_USER:restaurant_user}
+    password: ${DB_PASS:restaurant_pass}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -19,10 +19,10 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
 
 server:
   port: 8080
@@ -38,3 +38,4 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+

@@ -294,7 +294,7 @@ public class OrderController {
     })
     public ResponseEntity<OrderResponse> getOrderById(
             @Parameter(description = "UUID of the order to retrieve", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         OrderResponse orderResponse = orderService.getOrderById(id);
         return ResponseEntity.ok(orderResponse);
     }
@@ -384,8 +384,10 @@ public class OrderController {
             )
     })
     public ResponseEntity<List<OrderResponse>> getOrders(
-            @Parameter(description = "Optional status filter (PENDING, IN_PREPARATION, READY)", required = false, example = "PENDING")
-            @RequestParam(required = false) OrderStatus status) {
+            @Parameter(description = "Optional status filter (comma-separated). Example: PENDING,IN_PREPARATION,READY",
+                    required = false,
+                    example = "PENDING,IN_PREPARATION,READY")
+            @RequestParam(name = "status", required = false) List<OrderStatus> status) {
         List<OrderResponse> orders = orderService.getOrders(status);
         return ResponseEntity.ok(orders);
     }
@@ -495,7 +497,7 @@ public class OrderController {
     )
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @Parameter(description = "UUID of the order to update", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateStatusRequest request) {
         OrderResponse orderResponse = orderService.updateOrderStatus(id, request.getStatus());
         return ResponseEntity.ok(orderResponse);
