@@ -205,17 +205,43 @@ function OrderRow({
 }) {
   const id = order.id
   const next = NEXT_STATUSES[order.status] ?? []
+  const totalItems = order.items?.reduce((acc, i) => acc + (i.quantity ?? 0), 0) ?? 0
 
   return (
     <div className="rounded-2xl bg-slate-950/40 p-4 ring-1 ring-slate-800">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="flex-1">
           <div className="text-sm font-semibold">
             Mesa {order.tableId} · <span className="text-slate-400">#{id.slice(0, 8)}…</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            Ítems: {order.items?.reduce((acc, i) => acc + (i.quantity ?? 0), 0) ?? 0}
+            Total de ítems: {totalItems}
           </div>
+          
+          {/* Lista de items del pedido */}
+          {order.items && order.items.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {order.items.map((item, idx) => (
+                <div 
+                  key={item.productId + '-' + idx} 
+                  className="rounded-lg bg-slate-900/50 p-3 text-xs"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-200">
+                        {item.quantity}x {item.productName || item.name || `Producto #${item.productId}`}
+                      </div>
+                      {item.note && (
+                        <div className="mt-1 text-slate-400 italic">
+                          Nota: {item.note}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
