@@ -1,16 +1,16 @@
-# AUDITORIA Fase 1 - Consolidado (Borrador Colaborativo)
+# AUDITORIA Fase 1 - Consolidado Final de Auditoria
 
-Estado: EN CONSOLIDACION (faltan aportes de Companero 1 y Companero 2)
+Estado: CONSOLIDADO (3 de 3 aportes integrados)
 
 ## Baseline y contexto
 
 - Snapshot base post-MVP: `51b8f5d` (`audit: snapshot post-mvp`)
-- Rama de trabajo actual: `feature/auditoria-fase-1-ejecucion`
+- Rama de trabajo actual: `feature/auditoria-fase-1-diagnostico`
 - Alcance oficial: `docs/auditoria/ALCANCE_FASE1.md` (solo lectura)
 - Fuentes individuales:
   - `docs/auditoria/hallazgos-nico.md`
-  - `docs/auditoria/hallazgos-companero-1.md` (pendiente)
-  - `docs/auditoria/hallazgos-companero-2.md` (pendiente)
+  - `docs/auditoria/hallazgos-companero-1.md` (Raul)
+  - `docs/auditoria/hallazgos-luis.md` (Luis)
 
 ## Reglas de consolidacion aplicadas
 
@@ -82,6 +82,17 @@ Estado: EN CONSOLIDACION (faltan aportes de Companero 1 y Companero 2)
 - Impacto: operaciones de cocina sin control de acceso efectivo.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-006`
 
+#### H-ALTA-06 - Ausencia de capas arquitectonicas claras entre dominio/aplicacion/infraestructura
+
+- Dominio: Arquitectura global
+- Tipo: Code Smell
+- Descripcion consolidada: La estructura actual mezcla logica de negocio, orquestacion y detalles de infraestructura sin fronteras explicitas por capa.
+- Evidencia:
+  - `docs/auditoria/hallazgos-companero-1.md` (secciones 4.1 y 4.2)
+  - `docs/auditoria/hallazgos-luis.md` (hallazgos H-01, H-04, H-07)
+- Impacto: incrementa acoplamiento transversal y costo de evolucion.
+- Fuentes: `docs/auditoria/hallazgos-companero-1.md`, `docs/auditoria/hallazgos-luis.md`
+
 ### Severidad Media
 
 #### H-MEDIA-01 - Inyeccion por campo en kitchen-worker (DIP debilitado)
@@ -108,6 +119,17 @@ Estado: EN CONSOLIDACION (faltan aportes de Companero 1 y Companero 2)
 - Impacto: fragilidad ante cambios y mayor riesgo de regresion UI/estado.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-007`
 
+#### H-MEDIA-03 - Contrato de evento y modelo de integracion con baja resiliencia
+
+- Dominio: Integracion/Eventos
+- Tipo: SOLID + Code Smell
+- Descripcion consolidada: La publicacion/consumo de eventos carece de una estrategia robusta de recuperacion y versionado de contrato.
+- Evidencia:
+  - `docs/auditoria/hallazgos-luis.md` (H-04, H-06)
+  - `docs/auditoria/hallazgos-companero-1.md` (1.5, 2.3)
+- Impacto: riesgo de inconsistencia entre servicios cuando falla el broker o evoluciona el payload.
+- Fuentes: `docs/auditoria/hallazgos-luis.md`, `docs/auditoria/hallazgos-companero-1.md`
+
 ### Severidad Baja
 
 #### H-BAJA-01 - Drift documental en workflow de IA/OpenSpec
@@ -121,10 +143,24 @@ Estado: EN CONSOLIDACION (faltan aportes de Companero 1 y Companero 2)
 - Impacto: ruido operativo y errores de uso para nuevos colaboradores.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-008`
 
+#### H-BAJA-02 - Brechas de calidad no funcional (observabilidad, cobertura, hardening)
+
+- Dominio: Calidad transversal
+- Tipo: Code Smell
+- Descripcion consolidada: Se reportan gaps en observabilidad centralizada, cobertura de tests y endurecimiento (ej. rate limiting / control de abuso).
+- Evidencia:
+  - `docs/auditoria/hallazgos-companero-1.md` (4.4, 4.6, 5.2)
+  - `docs/auditoria/hallazgos-luis.md` (hallazgos de calidad no funcional)
+- Impacto: deteccion tardia de incidentes y mayor riesgo operativo en crecimiento.
+- Fuentes: `docs/auditoria/hallazgos-companero-1.md`, `docs/auditoria/hallazgos-luis.md`
+
 ## Deduplicacion aplicada
 
-- No se detectaron duplicados reales entre fuentes, porque solo `hallazgos-nico.md` contiene hallazgos actualmente.
-- Duplicados potenciales se reevaluaran cuando se incorporen los hallazgos de los otros dos auditores.
+- Se fusionaron hallazgos equivalentes en estas lineas maestras:
+  - `OrderService` sobredimensionado (SRP/God class/N+1) reportado por Nico, Raul y Luis.
+  - Riesgo de consistencia por eventos (publisher + worker) reportado por Raul y Luis, y parcialmente por Nico.
+  - Acoplamiento arquitectonico y ausencia de fronteras limpias reportado por Raul y Luis.
+  - Debilidades de seguridad de cocina reportadas por Nico y validadas por criterios de Luis.
 
 ## Mapeo hacia Fase 2 (patrones candidatos)
 
@@ -144,8 +180,7 @@ Estado: EN CONSOLIDACION (faltan aportes de Companero 1 y Companero 2)
 - `src/pages/client/CartPage.tsx`
 - `AI_WORKFLOW.md`
 
-## Pendientes para cierre final del reporte
+## Cierre de Fase 1
 
-- Integrar hallazgos de `hallazgos-companero-1.md`.
-- Integrar hallazgos de `hallazgos-companero-2.md`.
-- Ejecutar revision final de equipo (3/3) y congelar version final de Fase 1.
+- Consolidacion de hallazgos completada con aporte de 3 auditores.
+- Reporte listo para transicion a Fase 2 (patrones) y Fase 3 (refactor dirigido).
