@@ -194,6 +194,9 @@ public class OrderService {
 void testCreateOrder() {
     // Necesita: DB, RabbitMQ, ProductRepository mock
     // Difícil aislar validación de persistencia
+    when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+    when(orderRepository.save(any())).thenReturn(savedOrder);
+    // Lógica mezclada, difícil de testear
 }
 ```
 
@@ -202,20 +205,46 @@ void testCreateOrder() {
 @Test
 void testOrderValidator() {
     // Solo necesita ProductRepository mock
-    // Test unitario puro
+    // Test unitario puro de validación
+    validator.validateCreateOrderRequest(request);
 }
 
 @Test
 void testOrderMapper() {
     // Solo necesita ProductRepository mock
-    // Test de mapeo aislado
+    // Test de mapeo aislado con batch loading
+    OrderResponse response = mapper.mapToOrderResponse(order);
 }
 
 @Test
 void testOrderService() {
     // Mocks simples de componentes especializados
-    // Test de orquestación
+    when(orderValidator.validateCreateOrderRequest(request)).thenReturn();
+    when(orderMapper.mapToOrderResponse(order)).thenReturn(response);
+    // Test de orquestación limpio
 }
+```
+
+### Actualización de Tests
+
+**OrderServiceTest actualizado:**
+- ✅ Agregados mocks para `OrderValidator`, `OrderMapper`, `OrderEventBuilder`
+- ✅ Tests actualizados para verificar delegación correcta
+- ✅ Eliminadas dependencias directas de `ProductRepository` (ahora en `OrderValidator`)
+- ✅ 11 tests de `OrderServiceTest` pasando
+- ✅ 5 tests de `OrderControllerTest` pasando
+- ✅ Total: 16/16 tests relacionados con OrderService pasando
+
+**Cambios principales:**
+```java
+// Antes: OrderService hacía validación directamente
+when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+// Después: OrderService delega a OrderValidator
+doNothing().when(orderValidator).validateCreateOrderRequest(request);
+when(orderMapper.mapToOrderResponse(savedOrder)).thenReturn(expectedResponse);
+verify(orderValidator).validateCreateOrderRequest(request);
+verify(orderMapper).mapToOrderResponse(savedOrder);
 ```
 
 ---
@@ -232,8 +261,8 @@ void testOrderService() {
 ## Próximos Pasos
 
 1. ✅ Compilación exitosa
-2. ⏳ Ejecutar tests unitarios existentes
-3. ⏳ Agregar tests para nuevas clases
+2. ✅ Tests unitarios actualizados y pasando (16/16)
+3. ⏳ Agregar tests para nuevas clases (OrderValidator, OrderMapper, OrderEventBuilder)
 4. ⏳ Verificar performance en entorno de pruebas
 5. ⏳ Code review
 6. ⏳ Merge a `develop`
