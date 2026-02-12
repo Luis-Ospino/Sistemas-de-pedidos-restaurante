@@ -235,6 +235,26 @@ void testOrderService() {
 - ✅ 5 tests de `OrderControllerTest` pasando
 - ✅ Total: 16/16 tests relacionados con OrderService pasando
 
+**Tests nuevos para componentes especializados:**
+- ✅ **OrderValidatorTest** (10 tests): Validación de reglas de negocio
+  - Validación de tableId (null, cero, negativo, válido)
+  - Validación de items (null, vacío, válido)
+  - Validación de productos (inexistente, inactivo, múltiples)
+- ✅ **OrderMapperTest** (8 tests): Mapeo Entity↔DTO con optimización N+1
+  - Mapeo de items individuales y múltiples
+  - Verificación de batch loading (prevención N+1)
+  - Deduplicación de productos
+  - Manejo de productos faltantes
+- ✅ **OrderEventBuilderTest** (7 tests): Construcción de eventos
+  - Eventos con items individuales y múltiples
+  - Preservación de metadata
+  - Mantenimiento del orden de items
+
+**Resumen de cobertura:**
+- Tests totales relacionados con refactor: 41/41 ✅
+- Tests de componentes especializados: 25/25 ✅
+- Tests de integración (OrderService + Controller): 16/16 ✅
+
 **Cambios principales:**
 ```java
 // Antes: OrderService hacía validación directamente
@@ -262,7 +282,10 @@ verify(orderMapper).mapToOrderResponse(savedOrder);
 
 1. ✅ Compilación exitosa
 2. ✅ Tests unitarios actualizados y pasando (16/16)
-3. ⏳ Agregar tests para nuevas clases (OrderValidator, OrderMapper, OrderEventBuilder)
+3. ✅ Tests para nuevas clases agregados y pasando (25/25)
+   - OrderValidatorTest: 10 tests
+   - OrderMapperTest: 8 tests
+   - OrderEventBuilderTest: 7 tests
 4. ⏳ Verificar performance en entorno de pruebas
 5. ⏳ Code review
 6. ⏳ Merge a `develop`
