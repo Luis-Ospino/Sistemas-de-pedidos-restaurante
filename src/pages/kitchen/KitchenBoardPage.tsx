@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listOrders, patchOrderStatus } from '@/api/orders'
+import { HttpError } from '@/api/http'
 import type { Order, OrderStatus } from '@/api/contracts'
 import { ACTIVE_STATUSES, NEXT_STATUSES, STATUS_LABEL } from '@/domain/orderStatus'
+import { clearKitchenToken, getKitchenToken } from '@/store/kitchenAuth'
 import { SectionTitle } from '@/components/SectionTitle'
 import { Badge } from '@/components/Badge'
 import { ErrorState } from '@/components/ErrorState'
@@ -30,11 +32,21 @@ export function KitchenBoardPage() {
       else setRefreshing(true)
 
       try {
+        const kitchenToken = getKitchenToken()
+        if (!kitchenToken) {
+          navigate('/kitchen', { replace: true })
+          return
+        }
         const data = await listOrders({ status: statusFilter })
         if (!mountedRef.current) return
         setOrders(data)
         setError('')
       } catch (err) {
+        if (err instanceof HttpError && err.status === 401) {
+          clearKitchenToken()
+          navigate('/kitchen', { replace: true })
+          return
+        }
         if (!mountedRef.current) return
         const msg = err instanceof Error ? err.message : 'No pudimos cargar pedidos'
         setError(msg)
@@ -48,7 +60,7 @@ export function KitchenBoardPage() {
         }, 3000)
       }
     },
-    [statusFilter],
+    [navigate, statusFilter],
   )
 
   useEffect(() => {
@@ -93,9 +105,20 @@ export function KitchenBoardPage() {
         title="Bandeja de cocina"
         subtitle={`Pedidos activos (refresca cada 3s).${refreshing ? ' Actualizando...' : ''}`}
         right={
-          <button className="btn btn-ghost cursor-pointer" onClick={() => navigate('/client/table')}>
-            Ir a cliente
-          </button>
+          <div className="flex items-center gap-2">
+            <button className="btn btn-ghost cursor-pointer" onClick={() => navigate('/client/table')}>
+              Ir a cliente
+            </button>
+            <button
+              className="btn btn-ghost cursor-pointer"
+              onClick={() => {
+                clearKitchenToken()
+                navigate('/kitchen', { replace: true })
+              }}
+            >
+              Cerrar sesion
+            </button>
+          </div>
         }
       />
 
@@ -160,6 +183,13 @@ export function KitchenBoardPage() {
                           await patchOrderStatus(orderIdOf(o), newStatus)
                           const data = await listOrders({ status: statusFilter })
                           setOrders(data)
+                        } catch (err) {
+                          if (err instanceof HttpError && err.status === 401) {
+                            clearKitchenToken()
+                            navigate('/kitchen', { replace: true })
+                            return
+                          }
+                          throw err
                         } finally {
                           setPatching(false)
                         }
