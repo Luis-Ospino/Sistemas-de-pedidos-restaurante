@@ -1,6 +1,6 @@
 # AUDITORIA Fase 1 - Consolidado Final de Auditoria
 
-Estado: CONSOLIDADO (3 de 3 aportes integrados)
+Estado: CONSOLIDADO (3 de 3 aportes integrados) + EJECUCION DOCUMENTADA
 
 ## Baseline y contexto
 
@@ -32,6 +32,9 @@ Estado: CONSOLIDADO (3 de 3 aportes integrados)
   - `order-service/src/main/java/com/restaurant/orderservice/service/OrderService.java:250-284`
 - Impacto: eleva costo de cambio y puede degradar rendimiento en consultas de pedidos con muchos items.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-001`
+- Evidencia de implementacion:
+  - `docs/refactor/H-ALTA-01-SRP-REFACTOR.md`
+  - `docs/refactor/H-ALTA-01-COMPLETION-SUMMARY.md`
 
 #### H-ALTA-02 - Gap de consistencia entre persistencia y publicacion de eventos
 
@@ -43,6 +46,8 @@ Estado: CONSOLIDADO (3 de 3 aportes integrados)
   - `order-service/src/main/java/com/restaurant/orderservice/service/OrderService.java:127-135`
 - Impacto: inconsistencias entre Order Service y Kitchen Worker ante fallos de broker.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-002`
+- Evidencia de implementacion:
+  - `docs/auditoria/EVIDENCIA_H-ALTA-02.md`
 - Aciertos identificados (fragmentos ya existentes):
   - `order-service/src/main/java/com/restaurant/orderservice/service/OrderService.java:85`: `createOrder` ya opera con `@Transactional`, base correcta para rollback transaccional.
   - `order-service/src/main/java/com/restaurant/orderservice/service/OrderService.java:133`: el evento se construye desde la entidad persistida, evitando payload incompleto.
@@ -74,6 +79,9 @@ Estado: CONSOLIDADO (3 de 3 aportes integrados)
   - `order-service/src/main/java/com/restaurant/orderservice/dto/OrderItemRequest.java:19`
 - Impacto: potenciales errores 400 en entorno real y deuda de conversiones ad-hoc.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-005`
+- Evidencia de implementacion:
+  - `docs/refactor/H-ALTA-04-PRODUCTID-TYPE-FIX.md`
+  - `docs/refactor/H-ALTA-04-COMPLETION-SUMMARY.md`
 
 #### H-ALTA-05 - Seguridad de cocina no aplicada de extremo a extremo
 
@@ -87,6 +95,8 @@ Estado: CONSOLIDADO (3 de 3 aportes integrados)
   - `order-service/src/main/java/com/restaurant/orderservice/controller/OrderController.java`
 - Impacto: operaciones de cocina sin control de acceso efectivo.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-006`
+- Evidencia de implementacion:
+  - `docs/auditoria/EVIDENCIA_H-ALTA-05.md`
 - Aciertos identificados (fragmentos ya existentes):
   - `src/store/kitchenAuth.ts`: ya existia almacenamiento de token en `sessionStorage`, reutilizable para guardas de ruta.
   - `src/api/http.ts`: ya existia soporte para inyectar header de token por request.
@@ -130,6 +140,8 @@ Estado: CONSOLIDADO (3 de 3 aportes integrados)
   - `src/pages/kitchen/KitchenBoardPage.tsx:183-248`
 - Impacto: fragilidad ante cambios y mayor riesgo de regresion UI/estado.
 - Fuentes: `docs/auditoria/hallazgos-nico.md#hallazgo-nico-007`
+- Evidencia de implementacion:
+  - `docs/auditoria/EVIDENCIA_H-MEDIA-02.md`
 - Aciertos identificados (fragmentos ya existentes):
   - `src/pages/kitchen/KitchenBoardPage.tsx:23-31`: ya existia control de concurrencia (`inFlightRef`) para evitar solapamiento de polling.
   - `src/pages/kitchen/KitchenBoardPage.tsx:66-73`: ya existia limpieza explicita de recursos (`clearTimeout`) al desmontar.
@@ -205,3 +217,4 @@ Estado: CONSOLIDADO (3 de 3 aportes integrados)
 
 - Consolidacion de hallazgos completada con aporte de 3 auditores.
 - Reporte listo para transicion a Fase 2 (patrones) y Fase 3 (refactor dirigido).
+- Integracion a `develop` documentada en `docs/auditoria/INTEGRACION_DEVELOP.md`.
