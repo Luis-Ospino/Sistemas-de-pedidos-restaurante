@@ -10,7 +10,8 @@ import com.restaurant.orderservice.exception.InvalidOrderException;
 import com.restaurant.orderservice.exception.OrderNotFoundException;
 import com.restaurant.orderservice.exception.ProductNotFoundException;
 import com.restaurant.orderservice.repository.OrderRepository;
-import com.restaurant.orderservice.repository.ProductRepository;
+import com.restaurant.orderservice.service.command.OrderCommandExecutor;
+import com.restaurant.orderservice.service.command.PublishOrderPlacedEventCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderEventBuilder orderEventBuilder;
     private final OrderEventPublisher orderEventPublisher;
+    private final OrderCommandExecutor orderCommandExecutor;
     
     /**
      * Constructor for OrderService.
@@ -56,12 +58,14 @@ public class OrderService {
                        OrderValidator orderValidator,
                        OrderMapper orderMapper,
                        OrderEventBuilder orderEventBuilder,
-                       OrderEventPublisher orderEventPublisher) {
+                       OrderEventPublisher orderEventPublisher,
+                       OrderCommandExecutor orderCommandExecutor) {
         this.orderRepository = orderRepository;
         this.orderValidator = orderValidator;
         this.orderMapper = orderMapper;
         this.orderEventBuilder = orderEventBuilder;
         this.orderEventPublisher = orderEventPublisher;
+        this.orderCommandExecutor = orderCommandExecutor;
     }
     
     /**
@@ -117,9 +121,9 @@ public class OrderService {
         log.info("Order created successfully: orderId={}, tableId={}, itemCount={}", 
                 savedOrder.getId(), savedOrder.getTableId(), savedOrder.getItems().size());
         
-        // Delegate event building and publishing
+        // Delegate event building and publishing via command
         OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(savedOrder);
-        orderEventPublisher.publishOrderPlacedEvent(event);
+        orderCommandExecutor.execute(new PublishOrderPlacedEventCommand(orderEventPublisher, event));
         
         // Delegate mapping to OrderMapper
         return orderMapper.mapToOrderResponse(savedOrder);
