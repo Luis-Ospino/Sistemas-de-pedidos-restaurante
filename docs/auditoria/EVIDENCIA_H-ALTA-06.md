@@ -1,18 +1,29 @@
 # Evidencia de Implementacion - H-ALTA-06
 
+**Fecha:** 2026-02-13
+**Hallazgo:** H-ALTA-06 - Ausencia de capas arquitectonicas claras entre dominio/aplicacion/infraestructura
+**Rama:** `feature/auditoria-fase-1-ejecucion`
+**Estado:** COMPLETADO
+
+---
+
 ## Defecto
-`H-ALTA-06 - Ausencia de capas arquitectonicas claras entre dominio/aplicacion/infraestructura`
+
+El flujo de pedidos mezclaba reglas de negocio con detalles de infraestructura, dificultando evolucion y pruebas aisladas.
 
 ## Resumen de solucion
-Se aplico una refactorizacion guiada por `Ports and Adapters` en el flujo de eventos de pedido:
+
+Se aplico enfoque `Ports and Adapters` para el flujo de eventos de pedido:
 - Dominio: `OrderPlacedDomainEvent`.
-- Aplicacion: puerto de salida `OrderPlacedEventPublisherPort`.
-- Infraestructura: adaptador Rabbit `RabbitOrderPlacedEventPublisher` y mapeador de contrato.
+- Aplicacion: `OrderPlacedEventPublisherPort`.
+- Infraestructura: adaptador Rabbit y mapper de mensaje.
 
 ## Commits relacionados
+
 - `81cc2ad` `refactor(auditoria): desacoplar DB por servicio y robustecer contrato de eventos`
 
 ## Archivos principales modificados
+
 - `order-service/src/main/java/com/restaurant/orderservice/domain/event/OrderPlacedDomainEvent.java`
 - `order-service/src/main/java/com/restaurant/orderservice/application/port/out/OrderPlacedEventPublisherPort.java`
 - `order-service/src/main/java/com/restaurant/orderservice/infrastructure/messaging/RabbitOrderPlacedEventPublisher.java`
@@ -21,6 +32,13 @@ Se aplico una refactorizacion guiada por `Ports and Adapters` en el flujo de eve
 - `order-service/src/main/java/com/restaurant/orderservice/service/command/PublishOrderPlacedEventCommand.java`
 
 ## Evidencia funcional
-- `OrderService` ya no conoce detalles de transporte RabbitMQ; depende del puerto de aplicacion.
-- El comando `PublishOrderPlacedEventCommand` invoca el puerto y no una clase concreta de infraestructura.
-- Cambios de serializacion/headers quedan encapsulados en el adaptador Rabbit sin contaminar dominio.
+
+- `OrderService` delega publicacion al puerto de aplicacion.
+- El comando usa abstraccion de salida y no depende de clase concreta de transporte.
+- Ajustes de serializacion/headers se encapsulan en infraestructura.
+
+## Estado
+
+- Mitigacion implementada y cubierta por pruebas de unidad.
+- Referenciada en `AUDITORIA.md` como hallazgo mitigado.
+- Lista para merge a `develop`.

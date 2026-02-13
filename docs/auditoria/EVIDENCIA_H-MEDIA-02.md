@@ -1,63 +1,45 @@
 # Evidencia de Implementacion - H-MEDIA-02
 
-## Hallazgo
+**Fecha:** 2026-02-13
+**Hallazgo:** H-MEDIA-02 - KitchenBoardPage concentra demasiadas responsabilidades
+**Rama:** `feature/auditoria-fase-1-ejecucion`
+**Estado:** COMPLETADO
 
-- `H-MEDIA-02 - KitchenBoardPage concentra demasiadas responsabilidades`
+---
 
-## Objetivo
+## Defecto
 
-Reducir acoplamiento en `KitchenBoardPage` separando:
-- orquestacion de flujo de cocina (polling, auth, fetch y mutacion)
-- acciones de negocio de UI
-- renderizado
+`KitchenBoardPage` concentraba polling, autenticacion, fetch, mutaciones y render, aumentando acoplamiento y costo de mantenimiento.
 
-## Patrones aplicados
+## Resumen de solucion
 
-1. `Facade`
+Se aplicaron `Facade` y `Command` para desacoplar responsabilidades:
+- `KitchenBoardFacade` centraliza orquestacion y reglas de seguridad.
+- Comandos (`LoadKitchenOrdersCommand`, `ChangeKitchenOrderStatusCommand`) encapsulan acciones de cocina.
+- `useKitchenBoardController` separa flujo de estado de la vista.
+
+## Commits relacionados
+
+- `243a1a7` `refactor: implementado patron Facade + Command para resolver acoplamiento en KitchenBoardPage`
+- `ef40bb6` `docs: documentados aciertos existentes y evidencia de Facade+Command para H-MEDIA-02`
+
+## Archivos principales modificados
+
+- `src/pages/kitchen/KitchenBoardPage.tsx`
 - `src/pages/kitchen/KitchenBoardFacade.ts`
-- Encapsula autenticacion de cocina, manejo de 401 y navegacion de seguridad.
-- Orquesta operaciones de lectura y mutacion para el tablero.
-
-2. `Command`
+- `src/pages/kitchen/useKitchenBoardController.ts`
 - `src/pages/kitchen/commands/KitchenCommand.ts`
 - `src/pages/kitchen/commands/LoadKitchenOrdersCommand.ts`
 - `src/pages/kitchen/commands/ChangeKitchenOrderStatusCommand.ts`
-- Encapsula acciones de cocina como comandos ejecutables y testeables por separado.
 
-## Cambios por archivo
+## Evidencia funcional
 
-1. `src/pages/kitchen/KitchenBoardPage.tsx`
-- Se simplifica a componente de presentacion.
-- Se delega la logica de datos y transiciones al controlador.
-- Se elimina logica directa de fetch/mutacion/autenticacion desde el render.
+- `KitchenBoardPage` queda orientado a presentacion.
+- Polling, manejo de errores y transiciones de estado quedan fuera del componente de vista.
+- Se preservan controles existentes (anti-solapamiento y limpieza de timers).
 
-2. `src/pages/kitchen/useKitchenBoardController.ts`
-- Nuevo controlador (hook) para ciclo de vida del tablero:
-  - polling
-  - manejo de estados de carga y error
-  - refresco post-mutacion
+## Estado
 
-3. `src/pages/kitchen/KitchenBoardFacade.ts`
-- Nueva fachada para coordinar comandos y reglas de seguridad.
-- Maneja token ausente/expirado y redireccion a login.
-
-4. `src/pages/kitchen/commands/KitchenCommand.ts`
-- Contrato comun de comandos para la capa de cocina.
-
-5. `src/pages/kitchen/commands/LoadKitchenOrdersCommand.ts`
-- Comando de consulta de pedidos por filtro de estado.
-
-6. `src/pages/kitchen/commands/ChangeKitchenOrderStatusCommand.ts`
-- Comando de transicion de estado de pedido.
-
-## Aciertos existentes preservados
-
-- Control anti-solapamiento de polling (`inFlightRef`).
-- Limpieza de timeout al desmontar para evitar fugas.
-- Agrupacion memoizada de pedidos por estado.
-
-## Resultado
-
-- Se reduce el acoplamiento del componente de vista.
-- Se mejora mantenibilidad al separar responsabilidades por capa.
-- Se conserva el flujo funcional de la pantalla de cocina.
+- Mitigacion implementada en rama de ejecucion.
+- Evidencia enlazada desde `AUDITORIA.md`.
+- Lista para integracion a `develop` por PR.

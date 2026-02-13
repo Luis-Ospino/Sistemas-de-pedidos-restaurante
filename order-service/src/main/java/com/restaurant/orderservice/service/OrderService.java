@@ -5,11 +5,8 @@ import com.restaurant.orderservice.application.port.out.OrderPlacedEventPublishe
 import com.restaurant.orderservice.domain.event.OrderPlacedDomainEvent;
 import com.restaurant.orderservice.entity.Order;
 import com.restaurant.orderservice.entity.OrderItem;
-import com.restaurant.orderservice.entity.Product;
 import com.restaurant.orderservice.enums.OrderStatus;
-import com.restaurant.orderservice.exception.InvalidOrderException;
 import com.restaurant.orderservice.exception.OrderNotFoundException;
-import com.restaurant.orderservice.exception.ProductNotFoundException;
 import com.restaurant.orderservice.repository.OrderRepository;
 import com.restaurant.orderservice.service.command.OrderCommandExecutor;
 import com.restaurant.orderservice.service.command.PublishOrderPlacedEventCommand;
@@ -18,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,7 +27,7 @@ import java.util.stream.Collectors;
  * - OrderValidator: Business rule validation
  * - OrderMapper: Entity-DTO mapping (with N+1 optimization)
  * - OrderEventBuilder: Event construction
- * - OrderEventPublisher: Event publishing
+ * - OrderPlacedEventPublisherPort: Event publishing abstraction
  * 
  * Validates Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 3.1, 4.1, 4.2, 5.1, 5.2, 6.2
  */
@@ -43,7 +39,7 @@ public class OrderService {
     private final OrderValidator orderValidator;
     private final OrderMapper orderMapper;
     private final OrderEventBuilder orderEventBuilder;
-    private final OrderEventPublisher orderEventPublisher;
+    private final OrderPlacedEventPublisherPort orderPlacedEventPublisherPort;
     private final OrderCommandExecutor orderCommandExecutor;
     
     /**
@@ -53,20 +49,20 @@ public class OrderService {
      * @param orderValidator Validator for order business rules
      * @param orderMapper Mapper for entity-DTO conversions
      * @param orderEventBuilder Builder for order events
-     * @param orderEventPublisher Service for publishing order events to RabbitMQ
+     * @param orderPlacedEventPublisherPort Output port for publishing order events
      */
     @Autowired
     public OrderService(OrderRepository orderRepository,
                        OrderValidator orderValidator,
                        OrderMapper orderMapper,
                        OrderEventBuilder orderEventBuilder,
-                       OrderEventPublisher orderEventPublisher,
+                       OrderPlacedEventPublisherPort orderPlacedEventPublisherPort,
                        OrderCommandExecutor orderCommandExecutor) {
         this.orderRepository = orderRepository;
         this.orderValidator = orderValidator;
         this.orderMapper = orderMapper;
         this.orderEventBuilder = orderEventBuilder;
-        this.orderEventPublisher = orderEventPublisher;
+        this.orderPlacedEventPublisherPort = orderPlacedEventPublisherPort;
         this.orderCommandExecutor = orderCommandExecutor;
     }
     
@@ -124,8 +120,8 @@ public class OrderService {
                 savedOrder.getId(), savedOrder.getTableId(), savedOrder.getItems().size());
         
         // Delegate event building and publishing via command
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(savedOrder);
-        orderCommandExecutor.execute(new PublishOrderPlacedEventCommand(orderEventPublisher, event));
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(savedOrder);
+        orderCommandExecutor.execute(new PublishOrderPlacedEventCommand(orderPlacedEventPublisherPort, event));
         
         // Delegate mapping to OrderMapper
         return orderMapper.mapToOrderResponse(savedOrder);

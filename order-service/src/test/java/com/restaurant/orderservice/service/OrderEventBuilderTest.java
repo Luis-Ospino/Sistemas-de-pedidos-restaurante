@@ -3,7 +3,7 @@ package com.restaurant.orderservice.service;
 import com.restaurant.orderservice.entity.Order;
 import com.restaurant.orderservice.entity.OrderItem;
 import com.restaurant.orderservice.enums.OrderStatus;
-import com.restaurant.orderservice.event.OrderPlacedEvent;
+import com.restaurant.orderservice.domain.event.OrderPlacedDomainEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +49,7 @@ class OrderEventBuilderTest {
         order.setItems(List.of(item));
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
         assertThat(event).isNotNull();
@@ -58,7 +58,7 @@ class OrderEventBuilderTest {
         assertThat(event.getCreatedAt()).isEqualTo(createdAt);
         assertThat(event.getItems()).hasSize(1);
         
-        OrderPlacedEvent.OrderItemEventData eventItem = event.getItems().get(0);
+        OrderPlacedDomainEvent.OrderItemData eventItem = event.getItems().get(0);
         assertThat(eventItem.getProductId()).isEqualTo(10L);
         assertThat(eventItem.getQuantity()).isEqualTo(2);
     }
@@ -92,7 +92,7 @@ class OrderEventBuilderTest {
         order.setItems(List.of(item1, item2, item3));
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
         assertThat(event.getItems()).hasSize(3);
@@ -117,7 +117,7 @@ class OrderEventBuilderTest {
         order.setItems(new ArrayList<>());
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
         assertThat(event).isNotNull();
@@ -144,10 +144,10 @@ class OrderEventBuilderTest {
         order.setItems(List.of(item));
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
-        OrderPlacedEvent.OrderItemEventData eventItem = event.getItems().get(0);
+        OrderPlacedDomainEvent.OrderItemData eventItem = event.getItems().get(0);
         assertThat(eventItem.getProductId()).isEqualTo(10L);
         assertThat(eventItem.getQuantity()).isEqualTo(2);
         // OrderItemEventData only has productId and quantity, no note field
@@ -167,7 +167,7 @@ class OrderEventBuilderTest {
         order.setItems(new ArrayList<>());
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
         assertThat(event.getOrderId()).isEqualTo(orderId);
@@ -194,7 +194,7 @@ class OrderEventBuilderTest {
         order.setItems(List.of(item));
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
         assertThat(event.getItems().get(0).getQuantity()).isEqualTo(100);
@@ -223,7 +223,7 @@ class OrderEventBuilderTest {
         order.setItems(items);
         
         // Act
-        OrderPlacedEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
+        OrderPlacedDomainEvent event = orderEventBuilder.buildOrderPlacedEvent(order);
         
         // Assert
         assertThat(event.getItems()).hasSize(5);
