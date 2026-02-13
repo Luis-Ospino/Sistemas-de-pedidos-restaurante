@@ -1,6 +1,8 @@
 package com.restaurant.kitchenworker.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,49 +18,71 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderPlacedEvent implements Serializable {
     
     private static final long serialVersionUID = 1L;
-    
-    /**
-     * Unique identifier of the order
-     */
+
+    private UUID eventId;
+    private String eventType;
+    private Integer eventVersion;
+    private LocalDateTime occurredAt;
+    private Payload payload;
+
+    // Legacy flat fields preserved to accept old producers during migration.
     private UUID orderId;
-    
-    /**
-     * Table number where the order was placed
-     */
     private Integer tableId;
-    
-    /**
-     * List of items in the order
-     */
     private List<OrderItemEventData> items;
-    
-    /**
-     * Timestamp when the order was created
-     */
     private LocalDateTime createdAt;
-    
-    /**
-     * Inner class representing an order item in the event payload.
-     * Contains minimal information needed for order processing.
-     */
+
+    public UUID resolveOrderId() {
+        if (payload != null && payload.getOrderId() != null) {
+            return payload.getOrderId();
+        }
+        return orderId;
+    }
+
+    public Integer resolveTableId() {
+        if (payload != null && payload.getTableId() != null) {
+            return payload.getTableId();
+        }
+        return tableId;
+    }
+
+    public LocalDateTime resolveCreatedAt() {
+        if (payload != null && payload.getCreatedAt() != null) {
+            return payload.getCreatedAt();
+        }
+        return createdAt;
+    }
+
+    public Integer resolveVersion() {
+        return eventVersion != null ? eventVersion : 1;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Payload implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private UUID orderId;
+        private Integer tableId;
+        private List<OrderItemEventData> items;
+        private LocalDateTime createdAt;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OrderItemEventData implements Serializable {
         
         private static final long serialVersionUID = 1L;
-        
-        /**
-         * ID of the product being ordered
-         */
         private Long productId;
-        
-        /**
-         * Quantity of the product
-         */
         private Integer quantity;
     }
 }

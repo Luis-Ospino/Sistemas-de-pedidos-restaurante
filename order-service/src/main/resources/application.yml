@@ -39,3 +39,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+security:
+  kitchen:
+    token-header: ${KITCHEN_TOKEN_HEADER:X-Kitchen-Token}
+    token-value: ${KITCHEN_AUTH_TOKEN:1234}
+
