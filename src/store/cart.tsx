@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useReducer } from
 import type { Product } from '@/api/contracts'
 
 export type CartItem = {
-  productId: number
+  productId: string
   name: string
   quantity: number
   note?: string
@@ -17,8 +17,8 @@ type State = {
 type Action =
   | { type: 'SET_TABLE'; tableId: number }
   | { type: 'ADD_ITEM'; product: Product }
-  | { type: 'REMOVE_ITEM'; productId: number }
-  | { type: 'SET_QTY'; productId: number; quantity: number }
+  | { type: 'REMOVE_ITEM'; productId: string }
+  | { type: 'SET_QTY'; productId: string; quantity: number }
   | { type: 'SET_ORDER_NOTE'; note: string }
   | { type: 'CLEAR' }
 
@@ -29,20 +29,9 @@ function load(): State {
     const raw = localStorage.getItem(LS_KEY)
     if (!raw) return { tableId: null, items: [], orderNote: '' }
     const parsed = JSON.parse(raw) as State
-    
-    // Migración: convertir productId de string a number si es necesario
-    const migratedItems = Array.isArray(parsed.items)
-      ? parsed.items.map((item) => ({
-          ...item,
-          productId: typeof item.productId === 'string' 
-            ? parseInt(item.productId, 10) 
-            : item.productId,
-        }))
-      : []
-    
     return {
       tableId: typeof parsed.tableId === 'number' ? parsed.tableId : null,
-      items: migratedItems,
+      items: Array.isArray(parsed.items) ? parsed.items : [],
       orderNote: typeof parsed.orderNote === 'string' ? parsed.orderNote : '',
     }
   } catch {
@@ -103,8 +92,8 @@ const CartCtx = createContext<{
   actions: {
     setTable: (tableId: number) => void
     addItem: (product: Product) => void
-    removeItem: (productId: number) => void
-    setQty: (productId: number, quantity: number) => void
+    removeItem: (productId: string) => void
+    setQty: (productId: string, quantity: number) => void
     setOrderNote: (note: string) => void
     clear: () => void
   }
@@ -121,8 +110,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       actions: {
         setTable: (tableId: number) => dispatch({ type: 'SET_TABLE', tableId }),
         addItem: (product: Product) => dispatch({ type: 'ADD_ITEM', product }),
-        removeItem: (productId: number) => dispatch({ type: 'REMOVE_ITEM', productId }),
-        setQty: (productId: number, quantity: number) =>
+        removeItem: (productId: string) => dispatch({ type: 'REMOVE_ITEM', productId }),
+        setQty: (productId: string, quantity: number) =>
           dispatch({ type: 'SET_QTY', productId, quantity }),
         setOrderNote: (note: string) => dispatch({ type: 'SET_ORDER_NOTE', note }),
         clear: () => dispatch({ type: 'CLEAR' }),
