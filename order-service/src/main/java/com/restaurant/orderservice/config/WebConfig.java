@@ -1,7 +1,10 @@
 package com.restaurant.orderservice.config;
 
+import com.restaurant.orderservice.security.KitchenSecurityInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -10,6 +13,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    private final KitchenSecurityInterceptor kitchenSecurityInterceptor;
+
+    @Autowired
+    public WebConfig(KitchenSecurityInterceptor kitchenSecurityInterceptor) {
+        this.kitchenSecurityInterceptor = kitchenSecurityInterceptor;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -31,5 +41,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(allowedPatterns)
                 .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(kitchenSecurityInterceptor).addPathPatterns("/**");
     }
 }

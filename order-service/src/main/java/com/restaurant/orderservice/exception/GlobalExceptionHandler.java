@@ -136,6 +136,42 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * Handles KitchenAccessDeniedException.
+     * Returns 401 Unauthorized when kitchen token is missing or invalid.
+     *
+     * @param ex the KitchenAccessDeniedException that was thrown
+     * @return ResponseEntity with ErrorResponse and 401 status
+     */
+    @ExceptionHandler(KitchenAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleKitchenAccessDenied(KitchenAccessDeniedException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("Unauthorized")
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    /**
+     * Handles EventPublicationException.
+     * Returns 503 Service Unavailable when message broker operations fail.
+     *
+     * @param ex the EventPublicationException that was thrown
+     * @return ResponseEntity with ErrorResponse and 503 status
+     */
+    @ExceptionHandler(EventPublicationException.class)
+    public ResponseEntity<ErrorResponse> handleEventPublicationError(EventPublicationException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error("Service Unavailable")
+                .message("Message broker is temporarily unavailable")
+                .build();
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
+    /**
      * Handles all other uncaught exceptions.
      * Returns 500 Internal Server Error for unexpected errors.
      * 

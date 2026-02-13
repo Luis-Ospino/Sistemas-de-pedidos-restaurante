@@ -1,4 +1,5 @@
 import { ENV } from '@/api/env'
+import { getKitchenToken } from '@/store/kitchenAuth'
 
 export class HttpError extends Error {
   status: number
@@ -24,7 +25,8 @@ export async function http<T>(
     headers.set('Content-Type', 'application/json')
   }
 
-  const kitchenToken = init?.kitchenToken ?? (ENV.KITCHEN_FIXED_TOKEN || '')
+  const kitchenToken =
+    init?.kitchenToken ?? getKitchenToken() ?? ENV.KITCHEN_FIXED_TOKEN ?? ''
   if (kitchenToken) {
     headers.set(ENV.KITCHEN_TOKEN_HEADER, kitchenToken)
   }
