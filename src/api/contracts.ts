@@ -1,5 +1,5 @@
 export type Product = {
-  id: number
+  id: string
   name: string
   description?: string
   price?: number
@@ -12,7 +12,7 @@ export type OrderStatus =
   | 'READY'
 
 export type OrderItem = {
-  productId: number
+  productId: string
   quantity: number
   note?: string
   // info extra para UI (viene del backend)
@@ -33,7 +33,7 @@ export type Order = {
 
 export type CreateOrderRequest = {
   tableId: number
-  items: Array<{ productId: number; quantity: number; note?: string }>
+  items: Array<{ productId: string; quantity: number; note?: string }>
   note?: string
 }
 
