@@ -4,6 +4,8 @@ export type Product = {
   description?: string
   price?: number
   isActive?: boolean
+  category?: string
+  imageUrl?: string
 }
 
 export type OrderStatus =
