@@ -18,11 +18,11 @@ The frontend SHALL display table occupancy state in the table selection screen, 
 - **AND** the user can continue to the menu screen
 
 ### Requirement: Menu experience uses category tabs and quantity controls
-The frontend SHALL provide category tabs in the menu and allow users to choose item quantities before confirming the order.
+The frontend SHALL provide category tabs in the menu and allow users to choose item quantities before confirming the order, while consuming the menu dataset from backend APIs by default in production mode.
 
-#### Scenario: User filters menu by category tabs
+#### Scenario: User filters menu by category tabs with real backend data
 - **WHEN** the user changes the selected category tab
-- **THEN** the menu list updates to show items for that category
+- **THEN** the menu list updates to show items for that category based on the active backend response
 - **AND** the currently selected tab is visually highlighted
 
 #### Scenario: User adjusts quantity for a selected item
@@ -56,20 +56,15 @@ The frontend SHALL provide an order status screen where users can consult the cu
 - **AND** updates the visible status when backend state changes
 
 ### Requirement: Kitchen access and board support real-time operations
-The frontend SHALL provide a kitchen login gate by PIN and a kitchen board that refreshes frequently, shows order summaries, and supports status transitions.
+The frontend SHALL provide a kitchen login gate by PIN and a kitchen board that refreshes frequently, shows order summaries with product names and quantities, and supports status transitions against real API endpoints in production mode.
 
-#### Scenario: Kitchen access requires PIN
-- **WHEN** a user opens kitchen access
-- **THEN** the login screen requires a PIN before entering the kitchen board
-- **AND** invalid PIN attempts are rejected with visible feedback
-
-#### Scenario: Kitchen board reflects incoming and updated orders
-- **WHEN** new orders arrive or existing orders change status
+#### Scenario: Kitchen board reflects incoming and updated orders from API
+- **WHEN** new orders arrive or existing orders change status in backend
 - **THEN** the kitchen board refresh cycle updates visible columns and counters
-- **AND** each order card shows a summary of table, items, and current status
+- **AND** each order card shows summary of table, item names, quantities, and current status
 
-#### Scenario: Kitchen user changes order status
+#### Scenario: Kitchen user changes order status through API
 - **WHEN** a kitchen user executes a valid status transition
-- **THEN** the frontend sends the status update request to the API
+- **THEN** the frontend sends the status update request to the backend API
 - **AND** the board updates to place the order in the corresponding status column
 
