@@ -502,4 +502,46 @@ public class OrderController {
         OrderResponse orderResponse = orderService.updateOrderStatus(id, request.getStatus());
         return ResponseEntity.ok(orderResponse);
     }
+
+    /**
+     * DELETE /orders/{id} endpoint to delete one order.
+     */
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete one order",
+            description = "Deletes the specified order. This endpoint is protected for kitchen operations."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Order deleted successfully"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Order does not exist",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    public ResponseEntity<Void> deleteOrder(
+            @Parameter(description = "UUID of the order to delete", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
+            @PathVariable("id") UUID id) {
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * DELETE /orders endpoint to delete all orders.
+     */
+    @DeleteMapping
+    @Operation(
+            summary = "Delete all orders",
+            description = "Deletes all orders. Useful to reset the kitchen board and table availability."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "All orders deleted successfully")
+    })
+    public ResponseEntity<Void> deleteAllOrders() {
+        orderService.deleteAllOrders();
+        return ResponseEntity.noContent().build();
+    }
 }

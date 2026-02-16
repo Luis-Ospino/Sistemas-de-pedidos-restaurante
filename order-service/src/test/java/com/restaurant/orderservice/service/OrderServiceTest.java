@@ -242,6 +242,40 @@ class OrderServiceTest {
         verify(orderRepository, never()).save(any(Order.class));
     }
 
+    @Test
+    void deleteOrder_withExistingOrder_deletesOrder() {
+        UUID orderId = UUID.randomUUID();
+        Order order = buildOrder(orderId, OrderStatus.PENDING);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        orderService.deleteOrder(orderId);
+
+        verify(orderRepository).delete(order);
+    }
+
+    @Test
+    void deleteOrder_withUnknownOrder_throwsOrderNotFound() {
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.deleteOrder(orderId))
+                .isInstanceOf(OrderNotFoundException.class)
+                .hasMessageContaining(orderId.toString());
+
+        verify(orderRepository, never()).delete(any(Order.class));
+    }
+
+    @Test
+    void deleteAllOrders_returnsDeletedCount() {
+        when(orderRepository.count()).thenReturn(7L);
+
+        long deletedCount = orderService.deleteAllOrders();
+
+        assertThat(deletedCount).isEqualTo(7L);
+        verify(orderRepository).count();
+        verify(orderRepository).deleteAll();
+    }
+
     private static Order buildOrder(UUID id, OrderStatus status) {
         Order order = new Order();
         order.setId(id);

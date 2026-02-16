@@ -2,7 +2,9 @@
 import { http } from '@/api/http'
 import type { CreateOrderRequest, CreateOrderResponse, Order, OrderStatus } from '@/api/contracts'
 import {
+  mockClearOrders,
   mockCreateOrder,
+  mockDeleteOrder,
   mockGetOrder,
   mockListOrders,
   mockPatchOrderStatus,
@@ -73,6 +75,40 @@ export async function patchOrderStatus(
     if (ENV.ALLOW_MOCK_FALLBACK) {
       console.warn('Falling back to mock patchOrderStatus:', error)
       return mockPatchOrderStatus(orderId, newStatus)
+    }
+    throw error
+  }
+}
+
+export async function deleteOrder(orderId: string, kitchenToken?: string) {
+  if (ENV.USE_MOCK) return mockDeleteOrder(orderId)
+
+  try {
+    await http<unknown>(`/orders/${encodeURIComponent(orderId)}`, {
+      method: 'DELETE',
+      kitchenToken,
+    })
+  } catch (error) {
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock deleteOrder:', error)
+      return mockDeleteOrder(orderId)
+    }
+    throw error
+  }
+}
+
+export async function clearOrders(kitchenToken?: string) {
+  if (ENV.USE_MOCK) return mockClearOrders()
+
+  try {
+    await http<unknown>('/orders', {
+      method: 'DELETE',
+      kitchenToken,
+    })
+  } catch (error) {
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock clearOrders:', error)
+      return mockClearOrders()
     }
     throw error
   }

@@ -50,4 +50,23 @@ class KitchenSecurityInterceptorTest {
 
         assertThat(allowed).isTrue();
     }
+
+    @Test
+    void preHandle_deniesDeleteAllWhenTokenMissing() {
+        MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/orders");
+
+        assertThatThrownBy(() -> interceptor.preHandle(request, new MockHttpServletResponse(), new Object()))
+                .isInstanceOf(KitchenAccessDeniedException.class)
+                .hasMessageContaining("required");
+    }
+
+    @Test
+    void preHandle_allowsDeleteByIdWhenTokenMatches() {
+        MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/orders/123");
+        request.addHeader("X-Kitchen-Token", "1234");
+
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
+
+        assertThat(allowed).isTrue();
+    }
 }

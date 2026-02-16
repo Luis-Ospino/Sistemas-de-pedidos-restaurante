@@ -251,3 +251,15 @@ export async function mockPatchOrderStatus(orderId: string, newStatus: OrderStat
 
   return order
 }
+
+export async function mockDeleteOrder(orderId: string): Promise<void> {
+  seedOrders()
+  const index = orders.findIndex((order) => order.id === orderId)
+  if (index < 0) throw new Error('Pedido no encontrado')
+  orders.splice(index, 1)
+}
+
+export async function mockClearOrders(): Promise<void> {
+  seedOrders()
+  orders.splice(0, orders.length)
+}
