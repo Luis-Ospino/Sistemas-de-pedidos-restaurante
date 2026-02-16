@@ -36,7 +36,7 @@
 
 - [x] 6.1 Ejecutar validaciones tecnicas (`npm run build`, compose up --build, smoke tests de endpoints y flujo UI)
 - [x] 6.2 Registrar evidencia de validacion final en documentacion de calidad
-- [ ] 6.3 Crear commits atomicos por dominio (backend, frontend, docs, openspec) en `develop`
-- [ ] 6.4 Hacer `git push origin develop` con todos los cambios estabilizados
-- [ ] 6.5 Integrar `develop` en `main` con merge controlado y ejecutar verificacion post-merge
-- [ ] 6.6 Hacer `git push origin main` y dejar constancia de release productivo
+- [x] 6.3 Crear commits atomicos por dominio (backend, frontend, docs, openspec) en `develop`
+- [x] 6.4 Hacer `git push origin develop` con todos los cambios estabilizados
+- [x] 6.5 Integrar `develop` en `main` con merge controlado y ejecutar verificacion post-merge
+- [x] 6.6 Hacer `git push origin main` y dejar constancia de release productivo
