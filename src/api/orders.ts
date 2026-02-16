@@ -14,8 +14,11 @@ export async function createOrder(req: CreateOrderRequest) {
   try {
     return await http<CreateOrderResponse>('/orders', { method: 'POST', json: req })
   } catch (error) {
-    console.warn('Falling back to mock createOrder:', error)
-    return mockCreateOrder(req)
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock createOrder:', error)
+      return mockCreateOrder(req)
+    }
+    throw error
   }
 }
 
@@ -25,8 +28,11 @@ export async function getOrder(orderId: string) {
   try {
     return await http<Order>(`/orders/${encodeURIComponent(orderId)}`)
   } catch (error) {
-    console.warn('Falling back to mock getOrder:', error)
-    return mockGetOrder(orderId)
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock getOrder:', error)
+      return mockGetOrder(orderId)
+    }
+    throw error
   }
 }
 
@@ -42,8 +48,11 @@ export async function listOrders(params: { status?: OrderStatus[] }, kitchenToke
   try {
     return await http<Order[]>(`/orders${suffix}`, { kitchenToken })
   } catch (error) {
-    console.warn('Falling back to mock listOrders:', error)
-    return mockListOrders(params)
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock listOrders:', error)
+      return mockListOrders(params)
+    }
+    throw error
   }
 }
 
@@ -61,7 +70,10 @@ export async function patchOrderStatus(
       kitchenToken,
     })
   } catch (error) {
-    console.warn('Falling back to mock patchOrderStatus:', error)
-    return mockPatchOrderStatus(orderId, newStatus)
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock patchOrderStatus:', error)
+      return mockPatchOrderStatus(orderId, newStatus)
+    }
+    throw error
   }
 }
