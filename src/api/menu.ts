@@ -9,7 +9,10 @@ export async function getMenu() {
   try {
     return await http<Product[]>('/menu')
   } catch (error) {
-    console.warn('Falling back to mock menu data:', error)
-    return mockGetMenu()
+    if (ENV.ALLOW_MOCK_FALLBACK) {
+      console.warn('Falling back to mock menu data:', error)
+      return mockGetMenu()
+    }
+    throw error
   }
 }

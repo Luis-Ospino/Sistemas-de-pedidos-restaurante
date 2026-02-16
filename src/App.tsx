@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+﻿import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from "./components/AppLayout";
 import { TableSelectPage } from '@/pages/client/TableSelectPage'
 import { MenuPage } from '@/pages/client/MenuPage'
@@ -7,8 +7,8 @@ import { ConfirmationPage } from '@/pages/client/ConfirmationPage'
 import { OrderStatusPage } from '@/pages/client/OrderStatusPage'
 import { KitchenLoginPage } from '@/pages/kitchen/KitchenLoginPage'
 import { KitchenBoardPage } from '@/pages/kitchen/KitchenBoardPage'
-import { CartProvider } from '@/store/cart'
-import { RequireKitchenAuth } from '@/components/RequireKitchenAuth'
+import { WelcomePage } from '@/pages/WelcomePage'
+import { AppProvider } from '@/app/context'
 
 export default function App() {
   return (
@@ -25,14 +25,7 @@ export default function App() {
           <Route path="/client/status/:orderId" element={<OrderStatusPage />} />
 
           <Route path="/kitchen" element={<KitchenLoginPage />} />
-          <Route
-            path="/kitchen/board"
-            element={
-              <RequireKitchenAuth>
-                <KitchenBoardPage />
-              </RequireKitchenAuth>
-            }
-          />
+          <Route path="/kitchen/board" element={<KitchenBoardPage />} />
 
           <Route path="*" element={<Navigate to="/client/table" replace />} />
         </Route>
