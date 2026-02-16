@@ -27,6 +27,12 @@ public class KitchenEndpointScopeHandler extends AbstractKitchenSecurityHandler 
         if ("GET".equalsIgnoreCase(method) && "/orders".equals(uri)) {
             return true;
         }
+        if ("DELETE".equalsIgnoreCase(method) && "/orders".equals(uri)) {
+            return true;
+        }
+        if ("DELETE".equalsIgnoreCase(method) && PATH_MATCHER.match("/orders/*", uri)) {
+            return true;
+        }
         return "PATCH".equalsIgnoreCase(method) && PATH_MATCHER.match("/orders/*/status", uri);
     }
 }

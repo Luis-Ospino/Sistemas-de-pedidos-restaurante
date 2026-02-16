@@ -165,4 +165,30 @@ class OrderControllerTest {
         
         verify(orderService, times(1)).updateOrderStatus(orderId, OrderStatus.IN_PREPARATION);
     }
+
+    @Test
+    void deleteOrder_WithValidId_Returns204NoContent() {
+        // Arrange
+        doNothing().when(orderService).deleteOrder(orderId);
+
+        // Act
+        ResponseEntity<Void> response = orderController.deleteOrder(orderId);
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        verify(orderService, times(1)).deleteOrder(orderId);
+    }
+
+    @Test
+    void deleteAllOrders_Returns204NoContent() {
+        // Arrange
+        when(orderService.deleteAllOrders()).thenReturn(4L);
+
+        // Act
+        ResponseEntity<Void> response = orderController.deleteAllOrders();
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        verify(orderService, times(1)).deleteAllOrders();
+    }
 }

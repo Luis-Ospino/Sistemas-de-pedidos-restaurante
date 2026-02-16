@@ -1,10 +1,10 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ChefHat, Clock, LogOut } from 'lucide-react'
+import { ChefHat, Clock, LogOut, Trash2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { getMenu } from '@/api/menu'
-import { listOrders, patchOrderStatus } from '@/api/orders'
+import { clearOrders, deleteOrder, listOrders, patchOrderStatus } from '@/api/orders'
 import type { Order, OrderStatus } from '@/api/contracts'
 import { buildProductNameMap, resolveOrderItemName } from '@/domain/productLabel'
 import { ACTIVE_STATUSES, NEXT_STATUS, PREVIOUS_STATUS, STATUS_LABEL } from '@/domain/orderStatus'
@@ -27,11 +27,50 @@ const COLUMNS: Array<{ status: OrderStatus; title: string; tone: 'warning' | 'su
 
 const POLL_MS = 3000
 
+function parseApiDateTimeMs(value: string, nowMs?: number) {
+  const rawMs = Date.parse(value)
+  const hasTimezone = /(?:[zZ]|[+-]\d{2}:\d{2})$/.test(value)
+  const utcMs = hasTimezone ? Number.NaN : Date.parse(`${value}Z`)
+
+  const candidates = [rawMs, utcMs].filter((ms) => !Number.isNaN(ms))
+  if (candidates.length === 0) return Number.NaN
+  if (candidates.length === 1 || nowMs === undefined) return candidates[0]
+
+  return candidates.reduce((best, current) => {
+    const bestDistance = Math.abs(best - nowMs)
+    const currentDistance = Math.abs(current - nowMs)
+    return currentDistance < bestDistance ? current : best
+  })
+}
+
 function formatDateTime(value?: string) {
   if (!value) return 'N/A'
-  const date = new Date(value)
+  const ms = parseApiDateTimeMs(value)
+  if (Number.isNaN(ms)) return value
+  const date = new Date(ms)
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleString('es-CO')
+}
+
+function formatOrderAge(order: Order, nowMs: number) {
+  if (order.status === 'READY') return null
+  const baseTime = order.updatedAt ?? order.createdAt
+  if (!baseTime) return null
+
+  const baseMs = parseApiDateTimeMs(baseTime, nowMs)
+  if (Number.isNaN(baseMs)) return null
+
+  const normalizedBaseMs = Math.min(baseMs, nowMs)
+  const diffSec = Math.floor((nowMs - normalizedBaseMs) / 1000)
+  if (diffSec < 60) return `${diffSec}s`
+
+  const minutes = Math.floor(diffSec / 60)
+  const seconds = diffSec % 60
+  if (minutes < 60) return `${minutes}m ${seconds}s`
+
+  const hours = Math.floor(minutes / 60)
+  const remMinutes = minutes % 60
+  return `${hours}h ${remMinutes}m`
 }
 
 export function KitchenBoardPage() {
@@ -52,6 +91,9 @@ export function KitchenBoardPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
   const [patchingOrderId, setPatchingOrderId] = useState('')
+  const [deletingOrderId, setDeletingOrderId] = useState('')
+  const [clearingAll, setClearingAll] = useState(false)
+  const [nowMs, setNowMs] = useState(() => Date.now())
 
   const timeoutRef = useRef<number | null>(null)
   const mountedRef = useRef(false)
@@ -104,6 +146,13 @@ export function KitchenBoardPage() {
     }
   }, [loadOrders, navigate, token])
 
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setNowMs(Date.now())
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
   const grouped = useMemo(() => {
     const by: Record<OrderStatus, Order[]> = {
       PENDING: [],
@@ -147,6 +196,57 @@ export function KitchenBoardPage() {
     }
   }
 
+  async function removeOne(orderId: string) {
+    const confirmed = window.confirm('¿Deseas eliminar este pedido de la bandeja?')
+    if (!confirmed) return
+
+    try {
+      setDeletingOrderId(orderId)
+      await deleteOrder(orderId, token)
+      if (kitchenDetailOrderId === orderId) closeKitchenOrderDetail()
+      toast({
+        title: 'Pedido eliminado',
+        tone: 'success',
+      })
+      await loadOrders({ block: false })
+    } catch (err) {
+      toast({
+        title: 'No se pudo eliminar',
+        description: err instanceof Error ? err.message : 'Error inesperado',
+        tone: 'danger',
+      })
+    } finally {
+      setDeletingOrderId('')
+    }
+  }
+
+  async function removeAll() {
+    const confirmed = window.confirm(
+      '¿Seguro que deseas limpiar todos los pedidos? Las mesas quedaran disponibles nuevamente.',
+    )
+    if (!confirmed) return
+
+    try {
+      setClearingAll(true)
+      await clearOrders(token)
+      closeKitchenOrderDetail()
+      toast({
+        title: 'Bandeja limpiada',
+        description: 'Se eliminaron todos los pedidos.',
+        tone: 'success',
+      })
+      await loadOrders({ block: false })
+    } catch (err) {
+      toast({
+        title: 'No se pudo limpiar',
+        description: err instanceof Error ? err.message : 'Error inesperado',
+        tone: 'danger',
+      })
+    } finally {
+      setClearingAll(false)
+    }
+  }
+
   function logout() {
     clearKitchenToken()
     navigate('/kitchen', { replace: true })
@@ -180,6 +280,14 @@ export function KitchenBoardPage() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={removeAll}
+                disabled={clearingAll || activeOrders.length === 0}
+              >
+                {clearingAll ? 'Limpiando...' : 'Limpiar todo'}
+              </Button>
               <Link to="/client/table">
                 <Button variant="outline" size="sm">Cliente</Button>
               </Link>
@@ -214,9 +322,7 @@ export function KitchenBoardPage() {
                       const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0)
                       const next = NEXT_STATUS[order.status]
                       const previous = PREVIOUS_STATUS[order.status]
-                      const ageMinutes = order.createdAt
-                        ? Math.max(0, Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000))
-                        : null
+                      const ageLabel = formatOrderAge(order, nowMs)
 
                       return (
                         <motion.div
@@ -236,10 +342,10 @@ export function KitchenBoardPage() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline">{totalItems} items</Badge>
-                                {ageMinutes !== null ? (
+                                {ageLabel ? (
                                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <Clock className="h-3 w-3" />
-                                    {ageMinutes}m
+                                    {ageLabel}
                                   </span>
                                 ) : null}
                               </div>
@@ -263,7 +369,7 @@ export function KitchenBoardPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  disabled={patchingOrderId === order.id}
+                                  disabled={patchingOrderId === order.id || deletingOrderId === order.id}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     move(order, previous)
@@ -275,7 +381,7 @@ export function KitchenBoardPage() {
                               {next ? (
                                 <Button
                                   size="sm"
-                                  disabled={patchingOrderId === order.id}
+                                  disabled={patchingOrderId === order.id || deletingOrderId === order.id}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     move(order, next)
@@ -284,6 +390,18 @@ export function KitchenBoardPage() {
                                   {next === 'IN_PREPARATION' ? 'Iniciar' : 'Marcar listo'}
                                 </Button>
                               ) : null}
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                disabled={patchingOrderId === order.id || deletingOrderId === order.id}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  void removeOne(order.id)
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Eliminar
+                              </Button>
                             </div>
                           </Card>
                         </motion.div>

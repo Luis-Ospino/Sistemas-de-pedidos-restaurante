@@ -211,6 +211,36 @@ public class OrderService {
         
         return orderMapper.mapToOrderResponse(updatedOrder);
     }
+
+    /**
+     * Deletes a single order by id.
+     *
+     * @param orderId UUID of the order to delete
+     * @throws OrderNotFoundException if the order does not exist
+     */
+    @Transactional
+    public void deleteOrder(UUID orderId) {
+        log.info("Deleting order: orderId={}", orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        orderRepository.delete(order);
+        log.info("Order deleted successfully: orderId={}", orderId);
+    }
+
+    /**
+     * Deletes all orders.
+     *
+     * @return number of deleted orders
+     */
+    @Transactional
+    public long deleteAllOrders() {
+        long count = orderRepository.count();
+        log.info("Deleting all orders: count={}", count);
+        orderRepository.deleteAll();
+        return count;
+    }
     
     /**
      * Builds a domain event from an Order entity.
